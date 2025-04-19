@@ -5,10 +5,7 @@ import java.io.Serializable;
 import java.net.Socket;
 import java.util.function.Consumer;
 
-
-
 public class Client extends Thread{
-
 	
 	Socket socketClient;
 	
@@ -18,17 +15,16 @@ public class Client extends Thread{
 	private Consumer<Message> callback;
 	
 	Client(Consumer<Message> call){
-	
 		callback = call;
 	}
 	
 	public void run() {
 		
 		try {
-		socketClient= new Socket("127.0.0.1",5555);
-	    out = new ObjectOutputStream(socketClient.getOutputStream());
-	    in = new ObjectInputStream(socketClient.getInputStream());
-	    socketClient.setTcpNoDelay(true);
+			socketClient= new Socket("127.0.0.1",5555);
+			out = new ObjectOutputStream(socketClient.getOutputStream());
+			in = new ObjectInputStream(socketClient.getInputStream());
+			socketClient.setTcpNoDelay(true);
 		}
 		catch(Exception e) {}
 		

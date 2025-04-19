@@ -31,8 +31,6 @@ public class GuiClient extends Application{
 	ComboBox<Integer> listUsers;
 	ListView<String> listItems;
 
-	
-	
 	public static void main(String[] args) {
 		launch(args);
 	}
@@ -63,7 +61,6 @@ public class GuiClient extends Application{
 		listUsers.setValue(-1);
 		listItems = new ListView<String>();
 
-		
 		c1 = new TextField();
 		b1 = new Button("Send");
 		fields = new HBox(listUsers,b1);
@@ -72,8 +69,6 @@ public class GuiClient extends Application{
 		clientBox = new VBox(10, c1,fields,listItems);
 		clientBox.setStyle("-fx-background-color: blue;"+"-fx-font-family: 'serif';");
 
-
-
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent t) {
@@ -81,6 +76,10 @@ public class GuiClient extends Application{
                 System.exit(0);
             }
         });
+
+		//Sign in GUI
+
+
 
 
 		primaryStage.setScene(new Scene(clientBox, 400, 300));

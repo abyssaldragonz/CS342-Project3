@@ -7,7 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="JavaFXGUIServer" />
-        <module name="Project3Client" />
+        <module name="Project3Server" />
       </profile>
     </annotationProcessing>
   </component>
