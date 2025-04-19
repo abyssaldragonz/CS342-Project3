@@ -83,7 +83,7 @@ public class GuiClient extends Application{
 
 
 		primaryStage.setScene(new Scene(clientBox, 400, 300));
-		primaryStage.setTitle("Client");
+		primaryStage.setTitle("Client"); //test
 		primaryStage.show();
 		
 	}
