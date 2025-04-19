@@ -1,25 +1,21 @@
-
 import java.util.HashMap;
 
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 public class GuiClient extends Application{
-
-	
 	TextField c1;
 	Button b1;
 	HashMap<String, Scene> sceneMap;
@@ -77,13 +73,31 @@ public class GuiClient extends Application{
             }
         });
 
-		//Sign in GUI
+		// CREATE ACCOUNT GUI START ====================================================================================================
+		Text t0 = new Text("Create Account");
+		t0.setFont(Font.font("System", 20)); //idk what font we want to change the size
+		Text t1 = new Text("username");
+		TextField username = new TextField();
+		Text t2 = new Text("password");
+		TextField password = new TextField();
+		Button create = new Button("Create");
 
+		VBox createAccountBox = new VBox(5,t0,new HBox(10, t1), username, new HBox(10, t2), password, create);
+		createAccountBox.setMaxWidth(400);
+		createAccountBox.setPrefHeight(400);
+		createAccountBox.setMaxHeight(400);
+		createAccountBox.setAlignment(Pos.CENTER);
+		createAccountBox.setStyle("-fx-background-color: #808080; \n");
 
+		StackPane createAccountBackground = new StackPane(createAccountBox);
+		createAccountBackground.setStyle("-fx-background-color: #8EF2F5;");
 
+		Scene createAccountScene = new Scene(createAccountBackground, 700 , 700);
+		// CREATE ACCOUNT GUI START ====================================================================================================
 
-		primaryStage.setScene(new Scene(clientBox, 400, 300));
-		primaryStage.setTitle("Client"); //test
+		primaryStage.setScene(createAccountScene);
+//		primaryStage.setScene(new Scene(clientBox, 400, 300));
+		primaryStage.setTitle("Client");
 		primaryStage.show();
 		
 	}
