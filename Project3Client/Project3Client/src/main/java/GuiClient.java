@@ -42,7 +42,8 @@ public class GuiClient extends Application{
 		fields = new HBox(listUsers,b1);
 //		b1.setOnAction(e->{clientConnection.send(new Message(listUsers.getValue(), c1.getText())); c1.clear();});
 
-		clientBox = new VBox(10, c1,fields,listItems);
+		Button goToProfile = new Button("GO TO PROFILE PAGE");
+		clientBox = new VBox(10, c1,fields,listItems, goToProfile);
 		clientBox.setStyle("-fx-background-color: blue;"+"-fx-font-family: 'serif';");
 
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -97,6 +98,29 @@ public class GuiClient extends Application{
 
 		Scene createAccountScene = new Scene(createAccountBackground, 700 , 700);
 		// CREATE ACCOUNT GUI END ====================================================================================================
+
+
+		// PROFILE PAGE GUI START ====================================================================================================
+		Text profileUsername = new Text("@" + username.getText());
+		Button joinQueue = new Button("Join queue");
+		Button profileQuit = new Button("Quit");
+		Text profileStatsTitle = new Text("Stats");
+
+		HBox profileButtons = new HBox(joinQueue, profileQuit);
+
+		Text numWinsText = new Text(" wins");
+		Text numLossesText = new Text(" losses");
+		Text numTiesText = new Text(" ties");
+		VBox profileWinningStatsText = new VBox(profileStatsTitle, numWinsText, numLossesText, numTiesText);
+		Text winLossRatioText = new Text("wins:losses");
+		HBox profileStats = new HBox(profileWinningStatsText, winLossRatioText);
+
+		VBox mainProfile = new VBox(profileUsername, profileButtons, profileStats);
+		Scene profilePage = new Scene(mainProfile, 700, 700);
+
+
+		goToProfile.setOnAction(e->{primaryStage.setScene(profilePage);});
+		// PROFILE PAGE GUI END ====================================================================================================
 
 
 		primaryStage.setScene(createAccountScene);

@@ -62,5 +62,8 @@ public class Client extends Thread{
 		}
 	}
 
+	public String getUsername() {
+		return this.username;
+	}
 
 }
