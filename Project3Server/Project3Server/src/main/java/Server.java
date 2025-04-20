@@ -35,7 +35,7 @@ public class Server{
 		    while(true) {
 		
 				ClientThread c = new ClientThread(mysocket.accept(), count);
-				callback.accept(new Message(count,true));
+				callback.accept(new Message("Should be username",true));
 				clients.add(c);
 				c.start();
 				
@@ -51,12 +51,11 @@ public class Server{
 	
 
 		class ClientThread extends Thread{
-			
-		
 			Socket connection;
-			int count;
+			int count; //might not need tbh
 			ObjectInputStream in;
 			ObjectOutputStream out;
+			String username;
 			
 			ClientThread(Socket s, int count){
 				this.connection = s;
@@ -67,7 +66,7 @@ public class Server{
 				switch(message.type){
 					case TEXT:
 						for(ClientThread t: clients){
-							if(message.recipient==-1 || message.recipient==t.count ) {
+							if(message.recipient.equals("NEED TO FIX.")) {
 								try {
 									t.out.writeObject(message);
 								} catch (Exception e) {
@@ -111,7 +110,7 @@ public class Server{
 					System.out.println("Streams not open");
 				}
 				
-				updateClients(new Message(count,true));
+				updateClients(new Message("NEEDTOFIXTHISIDKWWAHTTHISIS",true));
 					
 				 while(true) {
 					    try {
@@ -121,7 +120,7 @@ public class Server{
 						}
 					    catch(Exception e) {
 							e.printStackTrace();
-							Message discon = new Message(count, false);
+							Message discon = new Message("NEEDTOFIX", false);
 					    	callback.accept(discon);
 					    	updateClients(discon);
 					    	clients.remove(this);

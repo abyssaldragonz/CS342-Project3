@@ -6,25 +6,34 @@ import java.net.Socket;
 import java.util.function.Consumer;
 
 public class Client extends Thread{
-	
 	Socket socketClient;
-	
 	ObjectOutputStream out;
 	ObjectInputStream in;
-	
 	private Consumer<Message> callback;
-	
+	private String username;
+
+	Client(Consumer<Message> call, String username) {
+		callback = call;
+		this.username = username;
+	}
+	//might be able to remove this
 	Client(Consumer<Message> call){
 		callback = call;
 	}
 	
 	public void run() {
-		
 		try {
 			socketClient= new Socket("127.0.0.1",5555);
 			out = new ObjectOutputStream(socketClient.getOutputStream());
 			in = new ObjectInputStream(socketClient.getInputStream());
 			socketClient.setTcpNoDelay(true);
+
+			try {// i literally dont know why this is here twice T_T (its also at the bottom)
+				Message message = (Message) in.readObject();
+				callback.accept(message);
+
+			}
+			catch(Exception e) {}
 		}
 		catch(Exception e) {}
 		

@@ -1,5 +1,4 @@
 import java.util.HashMap;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -11,7 +10,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -24,7 +22,7 @@ public class GuiClient extends Application{
 
 	HBox fields;
 
-	ComboBox<Integer> listUsers;
+	ComboBox<String> listUsers;
 	ListView<String> listItems;
 
 	public static void main(String[] args) {
@@ -33,34 +31,16 @@ public class GuiClient extends Application{
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		clientConnection = new Client(data->{
-				Platform.runLater(()->{
-					switch (data.type){
-						case NEWUSER:
-							listUsers.getItems().add(data.recipient);
-							listItems.getItems().add(data.recipient + " has joined!");
-							break;
-						case DISCONNECT:
-							listUsers.getItems().remove(data.recipient);
-							listItems.getItems().add(data.recipient + " has disconnected!");
-							break;
-						case TEXT:
-							listItems.getItems().add(data.recipient+": "+data.message);
-					}
-			});
-		});
-							
-		clientConnection.start();
 
-		listUsers = new ComboBox<Integer>();
-		listUsers.getItems().add(-1);
-		listUsers.setValue(-1);
+		listUsers = new ComboBox<String>();
+		listUsers.getItems().add("FIX");
+		listUsers.setValue("FIX");
 		listItems = new ListView<String>();
-
+		// STARTER CODE STUFF - chat box functionality (i broke it lol by getting rid of number client IDs
 		c1 = new TextField();
 		b1 = new Button("Send");
 		fields = new HBox(listUsers,b1);
-		b1.setOnAction(e->{clientConnection.send(new Message(listUsers.getValue(), c1.getText())); c1.clear();});
+//		b1.setOnAction(e->{clientConnection.send(new Message(listUsers.getValue(), c1.getText())); c1.clear();});
 
 		clientBox = new VBox(10, c1,fields,listItems);
 		clientBox.setStyle("-fx-background-color: blue;"+"-fx-font-family: 'serif';");
@@ -82,6 +62,30 @@ public class GuiClient extends Application{
 		TextField password = new TextField();
 		Button create = new Button("Create");
 
+		// On create button click
+		create.setOnAction(e->{
+			// we can setup the connection AFTER the button is pressed
+			clientConnection = new Client(data->{
+				Platform.runLater(()->{
+					switch (data.type){
+						case NEWUSER:
+							listUsers.getItems().add(data.recipient);
+							listItems.getItems().add(data.recipient + " has joined!");
+							break;
+						case DISCONNECT:
+							listUsers.getItems().remove(data.recipient);
+							listItems.getItems().add(data.recipient + " has disconnected!");
+							break;
+						case TEXT:
+							listItems.getItems().add(data.recipient+": "+data.message);
+					}
+				});
+			}, username.getText()); //send the username from gui to client
+			clientConnection.start();
+			primaryStage.setScene(new Scene(new VBox(20)));
+			primaryStage.show(); //not rlly working rn idk why
+		});
+
 		VBox createAccountBox = new VBox(5,t0,new HBox(10, t1), username, new HBox(10, t2), password, create);
 		createAccountBox.setMaxWidth(400);
 		createAccountBox.setPrefHeight(400);
@@ -93,7 +97,8 @@ public class GuiClient extends Application{
 		createAccountBackground.setStyle("-fx-background-color: #8EF2F5;");
 
 		Scene createAccountScene = new Scene(createAccountBackground, 700 , 700);
-		// CREATE ACCOUNT GUI START ====================================================================================================
+		// CREATE ACCOUNT GUI END ====================================================================================================
+
 
 		primaryStage.setScene(createAccountScene);
 //		primaryStage.setScene(new Scene(clientBox, 400, 300));
