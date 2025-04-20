@@ -82,8 +82,7 @@ public class GuiClient extends Application{
 				});
 			}, username.getText()); //send the username from gui to client
 			clientConnection.start();
-			primaryStage.setScene(new Scene(new VBox(20)));
-			primaryStage.show(); //not rlly working rn idk why
+			primaryStage.setScene(new Scene(clientBox, 700, 700));
 		});
 
 		VBox createAccountBox = new VBox(5,t0,new HBox(10, t1), username, new HBox(10, t2), password, create);

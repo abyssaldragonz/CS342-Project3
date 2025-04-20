@@ -17,7 +17,6 @@ public class Server{
 	
 	
 	Server(Consumer<Message> call){
-	
 		callback = call;
 		server = new TheServer();
 		server.start();
@@ -35,7 +34,6 @@ public class Server{
 		    while(true) {
 		
 				ClientThread c = new ClientThread(mysocket.accept(), count);
-				callback.accept(new Message("Should be username",true));
 				clients.add(c);
 				c.start();
 				
@@ -100,11 +98,19 @@ public class Server{
 			}
 			
 			public void run(){
-					
 				try {
 					in = new ObjectInputStream(connection.getInputStream());
 					out = new ObjectOutputStream(connection.getOutputStream());
-					connection.setTcpNoDelay(true);	
+					connection.setTcpNoDelay(true);
+
+					Message firstMsg = (Message) in.readObject();
+					if (firstMsg.type == MessageType.NEWUSER)
+					{
+						this.username = firstMsg.recipient;
+						Message joinedMsg = new Message(username, true);
+						callback.accept(joinedMsg);
+						updateClients(joinedMsg);
+					}
 				}
 				catch(Exception e) {
 					System.out.println("Streams not open");

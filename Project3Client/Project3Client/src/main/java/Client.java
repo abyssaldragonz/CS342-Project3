@@ -28,7 +28,11 @@ public class Client extends Thread{
 			in = new ObjectInputStream(socketClient.getInputStream());
 			socketClient.setTcpNoDelay(true);
 
-			try {// i literally dont know why this is here twice T_T (its also at the bottom)
+			Message loginMsg = new Message(username, true);
+			loginMsg.type = MessageType.NEWUSER;
+			send(loginMsg);
+
+			try {
 				Message message = (Message) in.readObject();
 				callback.accept(message);
 
