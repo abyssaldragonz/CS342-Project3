@@ -41,12 +41,18 @@ public class GuiServer extends Application{
 						listItems.getItems().add(data.recipient+": "+data.message);
 						break;
 					case NEWUSER:
-						listUsers.getItems().add(String.valueOf(data.recipient));
+						listUsers.getItems().add(data.recipient);
 						listItems.getItems().add(data.recipient + " has joined!");
 						break;
 					case DISCONNECT:
-						listUsers.getItems().remove(String.valueOf(data.recipient));
+						listUsers.getItems().remove(data.recipient);
 						listItems.getItems().add(data.recipient + " has disconnected!");
+						break;
+					case WAITINGINQUEUE:
+						listItems.getItems().add(data.message);
+						break;
+					case LEFTQUEUE:
+						listItems.getItems().add(data.message);
 				}
 			});
 		});
@@ -80,7 +86,5 @@ public class GuiServer extends Application{
 		primaryStage.show();
 		
 	}
-
-
 
 }

@@ -22,8 +22,10 @@ public class GuiClient extends Application{
 
 	HBox fields;
 
-	ComboBox<String> listUsers;
-	ListView<String> listItems;
+	ComboBox<String> listUsers = new ComboBox<String>();
+	ListView<String> listItems = new ListView<String>();
+
+	Text profileUsername = new Text("Temp so it doesnt get mad its undefined"); // for profile Section (but needs to be here)
 
 	public static void main(String[] args) {
 		launch(args);
@@ -32,15 +34,11 @@ public class GuiClient extends Application{
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 
-		listUsers = new ComboBox<String>();
-		listUsers.getItems().add("FIX");
-		listUsers.setValue("FIX");
-		listItems = new ListView<String>();
 		// STARTER CODE STUFF - chat box functionality (i broke it lol by getting rid of number client IDs
 		c1 = new TextField();
 		b1 = new Button("Send");
 		fields = new HBox(listUsers,b1);
-//		b1.setOnAction(e->{clientConnection.send(new Message(listUsers.getValue(), c1.getText())); c1.clear();});
+		b1.setOnAction(e->{clientConnection.send(new Message(listUsers.getValue(), c1.getText())); c1.clear();});
 
 		Button goToProfile = new Button("GO TO PROFILE PAGE");
 		clientBox = new VBox(10, c1,fields,listItems, goToProfile);
@@ -49,6 +47,7 @@ public class GuiClient extends Application{
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent t) {
+				clientConnection.send(new Message(listUsers.getValue(),false, "Filler for queue"));
                 Platform.exit();
                 System.exit(0);
             }
@@ -56,7 +55,7 @@ public class GuiClient extends Application{
 
 		// CREATE ACCOUNT GUI START ====================================================================================================
 		Text t0 = new Text("Create Account");
-		t0.setFont(Font.font("System", 20)); //idk what font we want to change the size
+		t0.setFont(Font.font("serif", 20)); //idk what font we want to change the size
 		Text t1 = new Text("username");
 		TextField username = new TextField();
 		Text t2 = new Text("password");
@@ -83,6 +82,12 @@ public class GuiClient extends Application{
 				});
 			}, username.getText()); //send the username from gui to client
 			clientConnection.start();
+			profileUsername.setText("@" + username.getText());
+
+			//make the comboBox after the username was decided so we can add it?
+			listUsers.getItems().add(username.getText());
+			listUsers.setValue(username.getText());
+
 			primaryStage.setScene(new Scene(clientBox, 700, 700));
 		});
 
@@ -101,9 +106,20 @@ public class GuiClient extends Application{
 
 
 		// PROFILE PAGE GUI START ====================================================================================================
-		Text profileUsername = new Text("@" + username.getText());
+		//moved profileUsername to within create button press bc here it is still nothing
 		Button joinQueue = new Button("Join queue");
+		Text queueStatus = new Text();
+		joinQueue.setOnAction(e -> {
+			queueStatus.setText("Waiting for opponent!");
+			clientConnection.send(new Message(listUsers.getValue(),true, "Filler for queue"));
+			joinQueue.setDisable(true);
+		});
 		Button profileQuit = new Button("Quit");
+		profileQuit.setOnAction(e -> {
+			clientConnection.send(new Message(listUsers.getValue(),false, "Filler for queue"));
+			Platform.exit();
+			System.exit(0);
+		});
 		Text profileStatsTitle = new Text("Stats");
 
 		HBox profileButtons = new HBox(joinQueue, profileQuit);
@@ -115,7 +131,7 @@ public class GuiClient extends Application{
 		Text winLossRatioText = new Text("wins:losses");
 		HBox profileStats = new HBox(profileWinningStatsText, winLossRatioText);
 
-		VBox mainProfile = new VBox(profileUsername, profileButtons, profileStats);
+		VBox mainProfile = new VBox(profileUsername, profileButtons, queueStatus, profileStats);
 		Scene profilePage = new Scene(mainProfile, 700, 700);
 
 
@@ -124,7 +140,6 @@ public class GuiClient extends Application{
 
 
 		primaryStage.setScene(createAccountScene);
-//		primaryStage.setScene(new Scene(clientBox, 400, 300));
 		primaryStage.setTitle("Client");
 		primaryStage.show();
 		

@@ -9,11 +9,11 @@ public class Message implements Serializable {
     public Message(String name, boolean connect){
         if(connect) {
             type = MessageType.NEWUSER;
-            message = "User "+name+" has joined!";
+            message = name +" has joined!";
             recipient = name;
         } else {
             type = MessageType.DISCONNECT;
-            message = "User "+name+" has disconnected!";
+            message = name +" has disconnected!";
             recipient = name;
         }
     }
@@ -24,10 +24,22 @@ public class Message implements Serializable {
 //        recipient = -1;
     }
 
-    public Message(int rec, String mess){
+    public Message(String rec, String mess){
         type = MessageType.TEXT;
         message = mess;
-//        recipient = rec;
+        recipient = rec;
+    }
+
+    public Message(String name, boolean joinedQueue, String filler){
+        if(joinedQueue) {
+            type = MessageType.WAITINGINQUEUE;
+            message = name +" is waiting in queue";
+            recipient = name;
+        } else {
+            type = MessageType.LEFTQUEUE;
+            message = name +" left the queue";
+            recipient = name;
+        }
     }
 }
 

@@ -52,7 +52,7 @@ public class GuiGame extends Application{
 		listItems = new ListView<String>();
 		listUsers = new ListView<String>();
 
-		lists = new HBox(listUsers,listItems);
+		HBox lists = new HBox(listUsers,listItems);
 
 
 		BorderPane pane = new BorderPane();

@@ -1,3 +1,3 @@
-public enum MessageType{
-    TEXT, NEWUSER, DISCONNECT;
+public enum MessageType {
+    TEXT, NEWUSER, DISCONNECT, WAITINGINQUEUE, LEFTQUEUE;
 }
