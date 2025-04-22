@@ -3,7 +3,7 @@ public class GameState {
     // -1 = empty piece
     // 0 = first player to join the game
     // 1 = second player to join the game
-    private int[7][6] gameBoard;
+    private int[][] gameBoard = new int[6][7];
     // the player whose turn it is/just passed
     private int currentPlayer;
     // winState is determined by whether there is a winner or not
@@ -16,7 +16,7 @@ public class GameState {
     public GameState() {
         for (int i = 0; i < 7; i++) {
             for (int j = 0; j < 6; j++)
-                gameBoard[i][j] = "-1";
+                gameBoard[i][j] = -1;
         }
         currentPlayer = 0;
         winState = -1;
@@ -55,14 +55,14 @@ public class GameState {
 
     // Function to return the gameboard to draw it out in the GUI
     // @return: String[][] - 2D array of Strings
-    public String[][] returnBoard() {
+    public int[][] returnBoard() {
         return gameBoard;
     }
 
     // Function to print the board to console -- for debugging and testing purposes
     private void printBoard() {
         for (int i = 0; i < 7; i++) {
-            String row = ""
+            String row = "";
             for (int j = 0; j < 6; j++)
                 row += Integer.toString(gameBoard[i][j]);
             System.out.println(row);

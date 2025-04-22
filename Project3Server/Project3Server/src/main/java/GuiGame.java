@@ -1,4 +1,3 @@
-
 import java.util.HashMap;
 import java.util.function.Consumer;
 
@@ -20,49 +19,33 @@ import javafx.stage.WindowEvent;
 public class GuiGame extends Application{
 
 	Server serverConnection;
-	
-	ListView<String> listItems;
-	ListView<String> listUsers;
-	
-	public static void main(String[] args) {
-		launch(args);
+
+	Server.ClientThread player1;
+	Server.ClientThread player2;
+
+	//An instance of a class that tracks the current gameState
+	GameState gameState;
+
+	public GuiGame(Server.ClientThread p1, Server.ClientThread p2){
+		player1 = p1;
+		player2 = p2;
 	}
 
+	public void sendToPlayers(Message msg) {
+		try {
+			player1.out.writeObject(msg);
+			player2.out.writeObject(msg);
+		} catch (Exception e) {
+			System.err.println("Failed to send to players");
+		}
+	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		serverConnection = new Server(data->{
-			Platform.runLater(()->{
-				switch (data.type){
-					case TEXT:
-						listItems.getItems().add(data.recipient+": "+data.message);
-						break;
-					case NEWUSER:
-						listUsers.getItems().add(String.valueOf(data.recipient));
-						listItems.getItems().add(data.recipient + " has joined!");
-						break;
-					case DISCONNECT:
-						listUsers.getItems().remove(String.valueOf(data.recipient));
-						listItems.getItems().add(data.recipient + " has disconnected!");
-				}
-			});
-		});
-
-		
-		listItems = new ListView<String>();
-		listUsers = new ListView<String>();
-
-		HBox lists = new HBox(listUsers,listItems);
-
-
 		BorderPane pane = new BorderPane();
 		pane.setPadding(new Insets(70));
 		pane.setStyle("-fx-background-color: coral");
-
-		pane.setCenter(lists);
 		pane.setStyle("-fx-font-family: 'serif'");
-		;
-
 		
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override

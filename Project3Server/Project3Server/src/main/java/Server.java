@@ -15,7 +15,7 @@ public class Server{
 	ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
 	TheServer server;
 	private Consumer<Message> callback;
-	ArrayList<Pair<ClientThread, ClientThread>> currentGames = new ArrayList<>();
+	ArrayList<GuiGame> currentGames = new ArrayList<>();
 	ArrayList<ClientThread> waitingQueue = new ArrayList<>();
 
 	Server(Consumer<Message> call){
@@ -98,10 +98,10 @@ public class Server{
 						if (waitingQueue.size() >= 2) {
 							ClientThread player1 = waitingQueue.remove(0);
 							ClientThread player2 = waitingQueue.remove(0);
-							currentGames.add(new Pair<>(player1, player2));
+							currentGames.add(new GuiGame(player1, player2));
 							//Notify users that the games have started
-							Message pairMessage1 = new Message(player1.username, "You are matched with " + player2.username);
-							Message pairMessage2 = new Message(player2.username, "You are matched with " + player1.username);
+							Message pairMessage1 = new Message(true, player1.username, player2.username);
+							Message pairMessage2 = new Message(true, player2.username, player1.username);
 							//send out the messages
 							try {
 								player1.out.writeObject(pairMessage1);

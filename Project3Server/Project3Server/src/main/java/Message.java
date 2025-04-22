@@ -30,7 +30,7 @@ public class Message implements Serializable {
         recipient = rec;
     }
 
-    public Message(String name, boolean joinedQueue, String filler){
+    public Message(boolean joinedQueue, String name){
         if(joinedQueue) {
             type = MessageType.WAITINGINQUEUE;
             message = name +" is waiting in queue";
@@ -41,5 +41,14 @@ public class Message implements Serializable {
             recipient = name;
         }
     }
+
+    public Message(boolean gameStarted, String name1, String name2){
+        if(gameStarted) {
+            type = MessageType.GAMESTART;
+            message = " You are matched with " + name2 + "!";
+            recipient = name1;
+        }
+    }
+
 }
 

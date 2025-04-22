@@ -34,7 +34,7 @@ public class GuiClient extends Application{
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 
-		// STARTER CODE STUFF - chat box functionality (i broke it lol by getting rid of number client IDs
+		// STARTER CODE STUFF
 		c1 = new TextField();
 		b1 = new Button("Send");
 		fields = new HBox(listUsers,b1);
@@ -44,10 +44,13 @@ public class GuiClient extends Application{
 		clientBox = new VBox(10, c1,fields,listItems, goToProfile);
 		clientBox.setStyle("-fx-background-color: blue;"+"-fx-font-family: 'serif';");
 
+		Text queueStatus = new Text();
+
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent t) {
-				clientConnection.send(new Message(listUsers.getValue(),false, "Filler for queue"));
+				if (queueStatus.getText().equals("Waiting for opponent!"))
+					clientConnection.send(new Message(false, listUsers.getValue()));
                 Platform.exit();
                 System.exit(0);
             }
@@ -78,6 +81,10 @@ public class GuiClient extends Application{
 							break;
 						case TEXT:
 							listItems.getItems().add(data.recipient+": "+data.message);
+							break;
+						case GAMESTART:
+							listItems.getItems().add(data.message);
+							displayGame(primaryStage);
 					}
 				});
 			}, username.getText()); //send the username from gui to client
@@ -108,15 +115,15 @@ public class GuiClient extends Application{
 		// PROFILE PAGE GUI START ====================================================================================================
 		//moved profileUsername to within create button press bc here it is still nothing
 		Button joinQueue = new Button("Join queue");
-		Text queueStatus = new Text();
 		joinQueue.setOnAction(e -> {
 			queueStatus.setText("Waiting for opponent!");
-			clientConnection.send(new Message(listUsers.getValue(),true, "Filler for queue"));
+			clientConnection.send(new Message(true, listUsers.getValue()));
 			joinQueue.setDisable(true);
 		});
 		Button profileQuit = new Button("Quit");
 		profileQuit.setOnAction(e -> {
-			clientConnection.send(new Message(listUsers.getValue(),false, "Filler for queue"));
+			if (queueStatus.getText().equals("Waiting for opponent!"))
+				clientConnection.send(new Message(false, listUsers.getValue()));
 			Platform.exit();
 			System.exit(0);
 		});
@@ -138,13 +145,22 @@ public class GuiClient extends Application{
 		goToProfile.setOnAction(e->{primaryStage.setScene(profilePage);});
 		// PROFILE PAGE GUI END ====================================================================================================
 
-
 		primaryStage.setScene(createAccountScene);
 		primaryStage.setTitle("Client");
 		primaryStage.show();
 		
 	}
-	
+
+	//This is the primary game scene
+	//Changes will be made depending on what moves are read
+	// A copy of this should probably also be stored on the server side
+	private void displayGame(Stage primaryStage) {
+		VBox gameRoot = new VBox();
+		gameRoot.setStyle("-fx-background-color: #12312;");
+		Scene gameScene = new Scene(gameRoot, 700, 700);
+		primaryStage.setTitle("CONNECT FOUR GAME #");
+		primaryStage.setScene(gameScene);
+	}
 
 
 }
