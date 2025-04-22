@@ -1,8 +1,8 @@
 public class GameState {
     // gameboard for connect four
     // -1 = empty piece
-    // 0 = first player to join the game
-    // 1 = second player to join the game
+    // 0 = first player to join the game - yellow
+    // 1 = second player to join the game - red
     private int[][] gameBoard = new int[6][7];
     // the player whose turn it is/just passed
     private int currentPlayer;

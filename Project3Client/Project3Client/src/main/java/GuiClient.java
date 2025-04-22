@@ -2,12 +2,13 @@ import java.util.HashMap;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color; // https://www.tutorialspoint.com/javafx/javafx_colors.htm
+import javafx.scene.shape.Circle;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -31,6 +32,63 @@ public class GuiClient extends Application{
 		launch(args);
 	}
 
+	//This is the primary game scene
+	//Changes will be made depending on what moves are read
+	// A copy of this should probably also be stored on the server side
+	private void displayGame(Stage primaryStage) {
+		class GamePiece extends Circle {
+			private int color;
+			private int row;
+			private int col;
+
+			GamePiece(int r, int c) {
+				row = r;
+				col = c;
+				color = -1;
+				setFill(Color.web("#D9D9D9",1.0));
+				setRadius(25);
+			}
+
+			public void changeColor(int newColor) {
+				color = newColor;
+				switch (color) {
+					case 0:
+						setFill(Color.YELLOW); // yellow goes first
+						break;
+					case 1:
+						setFill(Color.RED); // red goes second
+						break;
+					default:
+						setFill(Color.web("#D9D9D9",1.0));
+				}
+			}
+		}
+
+		// https://docs.oracle.com/javase/8/javafx/api/javafx/scene/layout/GridPane.html
+		GridPane gameBoard = new GridPane();
+		gameBoard.setStyle("-fx-background-color: #53B7F5;\n" +
+				"-fx-width: 500;\n"+
+				"-fx-height: 500;\n");
+
+
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 7; j++) {
+				GamePiece newPiece = new GamePiece(i, j);
+				gameBoard.add(newPiece, j, i); // to add, col then row
+				gameBoard.setMargin(newPiece, new Insets(7)); // https://docs.oracle.com/javase/8/javafx/api/javafx/geometry/Insets.html
+			}
+		}
+
+		Pane gameRoot = new Pane(gameBoard);
+		gameRoot.setStyle("-fx-background-color: white;");
+
+
+		Scene gameScene = new Scene(gameRoot, 700, 700);
+		primaryStage.setTitle("CONNECT FOUR GAME #");
+		primaryStage.setScene(gameScene);
+	}
+
+
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 
@@ -40,8 +98,7 @@ public class GuiClient extends Application{
 		fields = new HBox(listUsers,b1);
 		b1.setOnAction(e->{clientConnection.send(new Message(listUsers.getValue(), c1.getText())); c1.clear();});
 
-		Button goToProfile = new Button("GO TO PROFILE PAGE");
-		clientBox = new VBox(10, c1,fields,listItems, goToProfile);
+		clientBox = new VBox(10, c1,fields,listItems);
 		clientBox.setStyle("-fx-background-color: blue;"+"-fx-font-family: 'serif';");
 
 		Text queueStatus = new Text();
@@ -55,6 +112,41 @@ public class GuiClient extends Application{
                 System.exit(0);
             }
         });
+
+
+		// PROFILE PAGE GUI START ====================================================================================================
+		//moved profileUsername to within create button press bc here it is still nothing
+		Button joinQueue = new Button("Join queue");
+		joinQueue.setOnAction(e -> {
+			queueStatus.setText("Waiting for opponent!");
+			clientConnection.send(new Message(true, listUsers.getValue()));
+			joinQueue.setDisable(true);
+			joinQueue.setDisable(true);
+		});
+		Button profileQuit = new Button("Quit");
+		profileQuit.setOnAction(e -> {
+			if (queueStatus.getText().equals("Waiting for opponent!"))
+				clientConnection.send(new Message(false, listUsers.getValue()));
+			Platform.exit();
+			System.exit(0);
+		});
+		Text profileStatsTitle = new Text("Stats");
+
+		HBox profileButtons = new HBox(joinQueue, profileQuit);
+Button gametest = new Button("game test");
+gametest.setOnAction(e->displayGame(primaryStage));
+
+		Text numWinsText = new Text(" wins");
+		Text numLossesText = new Text(" losses");
+		Text numTiesText = new Text(" ties");
+		VBox profileWinningStatsText = new VBox(profileStatsTitle, numWinsText, numLossesText, numTiesText);
+		Text winLossRatioText = new Text("wins:losses");
+		HBox profileStats = new HBox(profileWinningStatsText, winLossRatioText);
+
+		VBox mainProfile = new VBox(profileUsername, profileButtons, queueStatus, profileStats, gametest);
+		Scene profilePage = new Scene(mainProfile, 700, 700);
+		// PROFILE PAGE GUI END ====================================================================================================
+
 
 		// CREATE ACCOUNT GUI START ====================================================================================================
 		Text t0 = new Text("Create Account");
@@ -95,7 +187,7 @@ public class GuiClient extends Application{
 			listUsers.getItems().add(username.getText());
 			listUsers.setValue(username.getText());
 
-			primaryStage.setScene(new Scene(clientBox, 700, 700));
+			primaryStage.setScene(profilePage);
 		});
 
 		VBox createAccountBox = new VBox(5,t0,new HBox(10, t1), username, new HBox(10, t2), password, create);
@@ -112,55 +204,11 @@ public class GuiClient extends Application{
 		// CREATE ACCOUNT GUI END ====================================================================================================
 
 
-		// PROFILE PAGE GUI START ====================================================================================================
-		//moved profileUsername to within create button press bc here it is still nothing
-		Button joinQueue = new Button("Join queue");
-		joinQueue.setOnAction(e -> {
-			queueStatus.setText("Waiting for opponent!");
-			clientConnection.send(new Message(true, listUsers.getValue()));
-			joinQueue.setDisable(true);
-		});
-		Button profileQuit = new Button("Quit");
-		profileQuit.setOnAction(e -> {
-			if (queueStatus.getText().equals("Waiting for opponent!"))
-				clientConnection.send(new Message(false, listUsers.getValue()));
-			Platform.exit();
-			System.exit(0);
-		});
-		Text profileStatsTitle = new Text("Stats");
 
-		HBox profileButtons = new HBox(joinQueue, profileQuit);
-
-		Text numWinsText = new Text(" wins");
-		Text numLossesText = new Text(" losses");
-		Text numTiesText = new Text(" ties");
-		VBox profileWinningStatsText = new VBox(profileStatsTitle, numWinsText, numLossesText, numTiesText);
-		Text winLossRatioText = new Text("wins:losses");
-		HBox profileStats = new HBox(profileWinningStatsText, winLossRatioText);
-
-		VBox mainProfile = new VBox(profileUsername, profileButtons, queueStatus, profileStats);
-		Scene profilePage = new Scene(mainProfile, 700, 700);
-
-
-		goToProfile.setOnAction(e->{primaryStage.setScene(profilePage);});
-		// PROFILE PAGE GUI END ====================================================================================================
 
 		primaryStage.setScene(createAccountScene);
 		primaryStage.setTitle("Client");
 		primaryStage.show();
 		
 	}
-
-	//This is the primary game scene
-	//Changes will be made depending on what moves are read
-	// A copy of this should probably also be stored on the server side
-	private void displayGame(Stage primaryStage) {
-		VBox gameRoot = new VBox();
-		gameRoot.setStyle("-fx-background-color: #12312;");
-		Scene gameScene = new Scene(gameRoot, 700, 700);
-		primaryStage.setTitle("CONNECT FOUR GAME #");
-		primaryStage.setScene(gameScene);
-	}
-
-
 }
