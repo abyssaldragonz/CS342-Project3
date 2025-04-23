@@ -62,7 +62,7 @@ public class Server{
 				switch(message.type){
 					case TEXT:
 						for(ClientThread t: clients){
-							if(message.recipient.equals("NEED TO FIX.")) {
+							if(message.recipient.equals(t.username)) {
 								try {
 									t.out.writeObject(message);
 								} catch (Exception e) {
@@ -139,8 +139,6 @@ public class Server{
 				catch(Exception e) {
 					System.out.println("Streams not open");
 				}
-				
-				updateClients(new Message("NEEDTOFIXTHISIDKWWAHTTHISIS",true));
 					
 				 while(true) {
 					    try {

@@ -15,13 +15,13 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 public class GuiClient extends Application{
-	TextField c1;
-	Button b1;
 	HashMap<String, Scene> sceneMap;
-	VBox clientBox;
 	Client clientConnection;
 
+	VBox clientBox;
 	HBox fields;
+
+	TextField username;
 
 	ComboBox<String> listUsers = new ComboBox<String>();
 	ListView<String> listItems = new ListView<String>();
@@ -79,11 +79,10 @@ public class GuiClient extends Application{
 			}
 		}
 
-		Pane gameRoot = new Pane(gameBoard);
+		Pane gameRoot = new HBox(20, gameBoard, clientBox);
 		gameRoot.setStyle("-fx-background-color: white;");
 
-
-		Scene gameScene = new Scene(gameRoot, 700, 700);
+		Scene gameScene = new Scene(gameRoot, 750, 450);
 		primaryStage.setTitle("CONNECT FOUR GAME #");
 		primaryStage.setScene(gameScene);
 	}
@@ -92,9 +91,9 @@ public class GuiClient extends Application{
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 
-		// STARTER CODE STUFF
-		c1 = new TextField();
-		b1 = new Button("Send");
+		// STARTER CODE STUFF MOSTLY CLIENT BOX
+		TextField c1 = new TextField();
+		Button b1 = new Button("Send");
 		fields = new HBox(listUsers,b1);
 		b1.setOnAction(e->{clientConnection.send(new Message(listUsers.getValue(), c1.getText())); c1.clear();});
 
@@ -107,7 +106,7 @@ public class GuiClient extends Application{
             @Override
             public void handle(WindowEvent t) {
 				if (queueStatus.getText().equals("Waiting for opponent!"))
-					clientConnection.send(new Message(false, listUsers.getValue()));
+					clientConnection.send(new Message(false, username.getText()));
                 Platform.exit();
                 System.exit(0);
             }
@@ -126,7 +125,7 @@ public class GuiClient extends Application{
 		Button profileQuit = new Button("Quit");
 		profileQuit.setOnAction(e -> {
 			if (queueStatus.getText().equals("Waiting for opponent!"))
-				clientConnection.send(new Message(false, listUsers.getValue()));
+				clientConnection.send(new Message(false, username.getText()));
 			Platform.exit();
 			System.exit(0);
 		});
@@ -152,7 +151,7 @@ gametest.setOnAction(e->displayGame(primaryStage));
 		Text t0 = new Text("Create Account");
 		t0.setFont(Font.font("serif", 20)); //idk what font we want to change the size
 		Text t1 = new Text("username");
-		TextField username = new TextField();
+		username = new TextField();
 		Text t2 = new Text("password");
 		TextField password = new TextField();
 		Button create = new Button("Create");
