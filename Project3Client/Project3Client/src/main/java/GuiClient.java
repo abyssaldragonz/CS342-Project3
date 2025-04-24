@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color; // https://www.tutorialspoint.com/javafx/javafx_colors.htm
 import javafx.scene.shape.Circle;
@@ -60,10 +61,22 @@ public class GuiClient extends Application{
 					case 1:
 						setFill(Color.RED); // red goes second
 						break;
+					// for the drop box
+					case 10:
+						setFill(Color.web("#FFFFC5"));
+						break;
+					case 20:
+						setFill(Color.web("#FF7F7F"));
+						break;
 					default:
 						setFill(Color.web("#D9D9D9",1.0));
 				}
 			}
+
+			// Mouse Movement
+			// https://docs.oracle.com/javase/8/javafx/api/javafx/scene/input/MouseEvent.html
+			// https://www.w3resource.com/java-exercises/javafx/javafx-events-and-event-handling-exercise-1.php
+
 		}
 
 		// https://docs.oracle.com/javase/8/javafx/api/javafx/scene/layout/GridPane.html
@@ -81,11 +94,46 @@ public class GuiClient extends Application{
 			}
 		}
 
-		Pane gameRoot = new HBox(20, gameBoard, clientBox);
-		gameRoot.setStyle("-fx-background-color: white;");
+		GridPane userDropbox = new GridPane();
+		userDropbox.setStyle("-fx-background-color: #D9D9D9;\n");
+		for (int c = 0; c < 7; c++) {
+			GamePiece newPiece = new GamePiece(0, c);
+			userDropbox.add(newPiece, c, 0); // to add, col then row
+			userDropbox.setMargin(newPiece, new Insets(7)); // https://docs.oracle.com/javase/8/javafx/api/javafx/geometry/Insets.html
+		}
+
+		// user interaction mechanism
+		// https://www.w3resource.com/java-exercises/javafx/javafx-events-and-event-handling-exercise-1.php
+		// https://stackoverflow.com/questions/31095954/how-to-get-gridpane-row-and-column-ids-on-mouse-entered-in-each-cell-of-grid-in
+		// https://stackoverflow.com/questions/18597939/handle-mouse-event-anywhere-with-javafx
+		// https://stackoverflow.com/questions/40943395/how-to-access-a-node-inside-of-a-gridpane-in-java
+		for (Node child : userDropbox.getChildren()) {
+			Integer c = GridPane.getColumnIndex(child);
+			int column = c == null ? 0 : c;
+			if ( (child instanceof GamePiece)) {
+
+				child.setOnMouseEntered(event -> { // TODO
+					((GamePiece) child).changeColor(10);
+				});
+
+				child.setOnMouseExited(event -> { //
+					((GamePiece) child).changeColor(-1);
+				});
+			}
+		}
+
+		// end
+
+		VBox mainGame = new VBox(userDropbox, gameBoard);
+
+		Pane gameRoot = new HBox(20, mainGame, clientBox);
+		gameRoot.setStyle("-fx-background-color: #D9D9D9;");
 
 		Scene gameScene = new Scene(gameRoot, 750, 450);
 		primaryStage.setTitle("CONNECT FOUR GAME #");
+
+
+
 		primaryStage.setScene(gameScene);
 	}
 
@@ -161,7 +209,12 @@ public class GuiClient extends Application{
 
 		// On create button click
 		create.setOnAction(e->{
-			// we can setup the connection AFTER the button is pressed
+			// check for empty username
+			if ( username.getText().isEmpty() ) {
+				return;
+			}
+
+				// we can setup the connection AFTER the button is pressed
 			clientConnection = new Client(data->{
 				Platform.runLater(()->{
 					switch (data.type){
