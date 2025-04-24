@@ -5,6 +5,8 @@ public class Message implements Serializable {
     MessageType type;
     String message;
     String recipient;
+    String sender;
+    boolean bool;
 
     public Message(String name, boolean connect){
         if(connect) {
@@ -18,15 +20,21 @@ public class Message implements Serializable {
         }
     }
 
-    public Message(String mess){
-        type = MessageType.TEXT;
-        message = mess;
-//        recipient = -1;
+    // only use this when asking the server a question
+    public Message(boolean inpBool){
+        type = MessageType.NAMECHECK;
+        bool = inpBool;
     }
 
     public Message(String rec, String mess){
         type = MessageType.TEXT;
         message = mess;
+        recipient = rec;
+    }
+    public Message(String rec, String sen, String mess){
+        type = MessageType.TEXT;
+        message = mess;
+        sender = sen;
         recipient = rec;
     }
 
@@ -45,10 +53,10 @@ public class Message implements Serializable {
     public Message(boolean gameStarted, String name1, String name2){
         if(gameStarted) {
             type = MessageType.GAMESTART;
-            message = name1 + "You are matched with " + name2 + "!";
+            message = "You are matched with " + name2 + "!";
+            sender = name2;
             recipient = name1;
         }
     }
 
 }
-

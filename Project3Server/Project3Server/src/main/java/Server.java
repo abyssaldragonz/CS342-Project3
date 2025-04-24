@@ -34,14 +34,12 @@ public class Server{
 		    while(true) {
 				// puts every new client thread in the arrayList
 				ClientThread c = new ClientThread(mysocket.accept(), count);
-				clients.add(c);
 				c.start();
 				count++;
-				
 			    }
 			}//end of try
 				catch(Exception e) {
-					callback.accept(new Message("Server did not launch"));
+					callback.accept(new Message("Server","Server did not launch"));
 				}
 			}//end of while
 		}
@@ -61,12 +59,13 @@ public class Server{
 			public void updateClients(Message message) {
 				switch(message.type){
 					case TEXT:
+						//if its meant for a client
 						for(ClientThread t: clients){
 							if(message.recipient.equals(t.username)) {
 								try {
 									t.out.writeObject(message);
 								} catch (Exception e) {
-									System.err.println("New User Error");
+									System.err.println("text Error");
 								}
 							}
 						}
@@ -87,7 +86,7 @@ public class Server{
 							try {
 								t.out.writeObject(message);
 							} catch (Exception e) {
-								System.err.println("New User Error");
+								System.err.println("Disconnect Error");
 							}
 						}
 					break;
@@ -130,7 +129,34 @@ public class Server{
 					Message firstMsg = (Message) in.readObject();
 					if (firstMsg.type == MessageType.NEWUSER)
 					{
+						//lets see if the username is taken
+						boolean isTaken = false;
+						for (ClientThread c : clients) {
+							if (c.username != null && c.username.equals(firstMsg.recipient)) {
+								isTaken = true;
+								break;
+							}
+						}
+						if (isTaken) {
+							Message error = new Message(false);
+							try {
+								out.writeObject(error);
+								connection.close();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+							connection.close();
+							return;
+						}
 						this.username = firstMsg.recipient;
+						clients.add(this);
+						Message success = new Message(true);
+						try {
+							out.writeObject(success);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+
 						Message joinedMsg = new Message(username, true);
 						callback.accept(joinedMsg);
 						updateClients(joinedMsg);

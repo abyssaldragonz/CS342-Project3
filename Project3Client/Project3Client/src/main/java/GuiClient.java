@@ -22,8 +22,10 @@ public class GuiClient extends Application{
 	HBox fields;
 
 	TextField username;
+	String currentOpponent;
 
-	ComboBox<String> listUsers = new ComboBox<String>();
+	Text nameTakenMessage = new Text();
+
 	ListView<String> listItems = new ListView<String>();
 
 	Text profileUsername = new Text("Temp so it doesnt get mad its undefined"); // for profile Section (but needs to be here)
@@ -94,8 +96,12 @@ public class GuiClient extends Application{
 		// STARTER CODE STUFF MOSTLY CLIENT BOX
 		TextField c1 = new TextField();
 		Button b1 = new Button("Send");
-		fields = new HBox(listUsers,b1);
-		b1.setOnAction(e->{clientConnection.send(new Message(listUsers.getValue(), c1.getText())); c1.clear();});
+		fields = new HBox(b1);
+		b1.setOnAction(e->{
+			clientConnection.send(new Message(currentOpponent, username.getText(), c1.getText()));
+			listItems.getItems().add(username.getText()+": "+ c1.getText());
+			c1.clear();
+		});
 
 		clientBox = new VBox(10, c1,fields,listItems);
 		clientBox.setStyle("-fx-background-color: blue;"+"-fx-font-family: 'serif';");
@@ -118,8 +124,7 @@ public class GuiClient extends Application{
 		Button joinQueue = new Button("Join queue");
 		joinQueue.setOnAction(e -> {
 			queueStatus.setText("Waiting for opponent!");
-			clientConnection.send(new Message(true, listUsers.getValue()));
-			joinQueue.setDisable(true);
+			clientConnection.send(new Message(true, username.getText()));
 			joinQueue.setDisable(true);
 		});
 		Button profileQuit = new Button("Quit");
@@ -132,8 +137,8 @@ public class GuiClient extends Application{
 		Text profileStatsTitle = new Text("Stats");
 
 		HBox profileButtons = new HBox(joinQueue, profileQuit);
-Button gametest = new Button("game test");
-gametest.setOnAction(e->displayGame(primaryStage));
+		Button gametest = new Button("game test");
+		gametest.setOnAction(e->displayGame(primaryStage));
 
 		Text numWinsText = new Text(" wins");
 		Text numLossesText = new Text(" losses");
@@ -152,8 +157,6 @@ gametest.setOnAction(e->displayGame(primaryStage));
 		t0.setFont(Font.font("serif", 20)); //idk what font we want to change the size
 		Text t1 = new Text("username");
 		username = new TextField();
-		Text t2 = new Text("password");
-		TextField password = new TextField();
 		Button create = new Button("Create");
 
 		// On create button click
@@ -163,33 +166,39 @@ gametest.setOnAction(e->displayGame(primaryStage));
 				Platform.runLater(()->{
 					switch (data.type){
 						case NEWUSER:
-							listUsers.getItems().add(data.recipient);
-							listItems.getItems().add(data.recipient + " has joined!");
+//							listItems.getItems().add(data.recipient + " has joined!");
 							break;
 						case DISCONNECT:
-							listUsers.getItems().remove(data.recipient);
-							listItems.getItems().add(data.recipient + " has disconnected!");
+							if (currentOpponent != null && currentOpponent.equals(data.recipient))
+								listItems.getItems().add(data.recipient + " has disconnected!");
 							break;
 						case TEXT:
-							listItems.getItems().add(data.recipient+": "+data.message);
+							listItems.getItems().add(data.sender+": "+ data.message);
 							break;
 						case GAMESTART:
 							listItems.getItems().add(data.message);
+							currentOpponent = data.sender;
+							queueStatus.setText(""); //reset queue status
 							displayGame(primaryStage);
+							break;
+						case NAMECHECK:
+							if (!data.bool) {
+								// tell them!
+								nameTakenMessage.setText("This username is already taken");
+								try {
+									clientConnection.socketClient.close();
+								} catch (Exception e1) { e1.printStackTrace(); }
+							} else {
+								profileUsername.setText("@" + username.getText());
+								primaryStage.setScene(profilePage);
+							}
 					}
 				});
 			}, username.getText()); //send the username from gui to client
 			clientConnection.start();
-			profileUsername.setText("@" + username.getText());
-
-			//make the comboBox after the username was decided so we can add it?
-			listUsers.getItems().add(username.getText());
-			listUsers.setValue(username.getText());
-
-			primaryStage.setScene(profilePage);
 		});
 
-		VBox createAccountBox = new VBox(5,t0,new HBox(10, t1), username, new HBox(10, t2), password, create);
+		VBox createAccountBox = new VBox(5,t0,new HBox(10, t1), username, create, nameTakenMessage);
 		createAccountBox.setMaxWidth(400);
 		createAccountBox.setPrefHeight(400);
 		createAccountBox.setMaxHeight(400);
@@ -201,9 +210,6 @@ gametest.setOnAction(e->displayGame(primaryStage));
 
 		Scene createAccountScene = new Scene(createAccountBackground, 700 , 700);
 		// CREATE ACCOUNT GUI END ====================================================================================================
-
-
-
 
 		primaryStage.setScene(createAccountScene);
 		primaryStage.setTitle("Client");

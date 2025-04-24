@@ -29,7 +29,7 @@ public class Client extends Thread{
 			socketClient.setTcpNoDelay(true);
 
 			Message loginMsg = new Message(username, true);
-			loginMsg.type = MessageType.NEWUSER;
+			loginMsg.type = MessageType.NEWUSER; //p sure we dont need this line... too lazy to test tho
 			send(loginMsg);
 
 			try {
