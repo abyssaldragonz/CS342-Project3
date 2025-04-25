@@ -27,7 +27,16 @@ public class Server{
 	public class TheServer extends Thread{
 		
 		public void run() {
-		
+
+			// TODO TESTING
+			GameState newGame = new GameState();
+			newGame.placePiece(0, 0);
+			newGame.placePiece(1, 0);
+			newGame.placePiece(0, 0);
+			newGame.placePiece(1, 1);
+			newGame.placePiece(0, 5);
+			newGame.printBoard();
+
 			try(ServerSocket mysocket = new ServerSocket(5555);){
 		    System.out.println("Server is waiting for a client!");
 			

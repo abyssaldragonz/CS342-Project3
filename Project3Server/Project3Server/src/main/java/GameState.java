@@ -14,8 +14,8 @@ public class GameState {
 
     // Default constructor for a new gameboard
     public GameState() {
-        for (int i = 0; i < 7; i++) {
-            for (int j = 0; j < 6; j++)
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 7; j++)
                 gameBoard[i][j] = -1;
         }
         currentPlayer = 0;
@@ -30,7 +30,7 @@ public class GameState {
         currentPlayer = player;
 
         // finding the lowest row the piece can be placed in that row
-        int currRow = 6;
+        int currRow = 5;
         while (currRow >= 0) {
             if (gameBoard[currRow][placedCol] != -1) { // there is already a piece in that position
                 currRow--;
@@ -60,11 +60,11 @@ public class GameState {
     }
 
     // Function to print the board to console -- for debugging and testing purposes
-    private void printBoard() {
+    public void printBoard() {
         for (int i = 0; i < 7; i++) {
             String row = "";
             for (int j = 0; j < 6; j++)
-                row += Integer.toString(gameBoard[i][j]);
+                row += Integer.toString(gameBoard[i][j]) + "\t";
             System.out.println(row);
         }
     }

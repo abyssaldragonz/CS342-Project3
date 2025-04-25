@@ -63,20 +63,15 @@ public class GuiClient extends Application{
 						break;
 					// for the drop box
 					case 10:
-						setFill(Color.web("#FFFFC5"));
+						setFill(Color.web("#FFFFC5")); // light yellow
 						break;
 					case 20:
-						setFill(Color.web("#FF7F7F"));
+						setFill(Color.web("#FF7F7F")); // light red
 						break;
 					default:
-						setFill(Color.web("#D9D9D9",1.0));
+						setFill(Color.web("#D9D9D9",1.0)); // plain gray
 				}
 			}
-
-			// Mouse Movement
-			// https://docs.oracle.com/javase/8/javafx/api/javafx/scene/input/MouseEvent.html
-			// https://www.w3resource.com/java-exercises/javafx/javafx-events-and-event-handling-exercise-1.php
-
 		}
 
 		// https://docs.oracle.com/javase/8/javafx/api/javafx/scene/layout/GridPane.html
@@ -107,18 +102,27 @@ public class GuiClient extends Application{
 		// https://stackoverflow.com/questions/31095954/how-to-get-gridpane-row-and-column-ids-on-mouse-entered-in-each-cell-of-grid-in
 		// https://stackoverflow.com/questions/18597939/handle-mouse-event-anywhere-with-javafx
 		// https://stackoverflow.com/questions/40943395/how-to-access-a-node-inside-of-a-gridpane-in-java
+		// https://docs.oracle.com/javase/8/javafx/api/javafx/scene/input/MouseEvent.html
+		// https://www.w3resource.com/java-exercises/javafx/javafx-events-and-event-handling-exercise-1.php
+
 		for (Node child : userDropbox.getChildren()) {
 			Integer c = GridPane.getColumnIndex(child);
 			int column = c == null ? 0 : c;
 			if ( (child instanceof GamePiece)) {
 
-				child.setOnMouseEntered(event -> { // TODO
+				child.setOnMouseEntered(event -> { // TODO change color depending on player
 					((GamePiece) child).changeColor(10);
 				});
 
 				child.setOnMouseExited(event -> { //
 					((GamePiece) child).changeColor(-1);
 				});
+
+				// actually clicking will drop the piece
+				child.setOnMousePressed(event -> { // TODO
+					((GamePiece) child).changeColor(1);
+				});
+
 			}
 		}
 
