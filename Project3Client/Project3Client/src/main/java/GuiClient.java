@@ -169,7 +169,17 @@ public class GuiClient extends Application{
 
 		// PROFILE PAGE GUI START ====================================================================================================
 		//moved profileUsername to within create button press bc here it is still nothing
-		Button joinQueue = new Button("Join queue");
+		Button joinQueue = new Button("Join public queue");
+		Button startPrivateGame = new Button("Start private game");
+		Button joinPrivateGame = new Button("Join private game");
+		Button submitRoom = new Button("Submit room");
+		submitRoom.setDisable(true);
+		Button joinRoom = new Button("Join room");
+		joinRoom.setDisable(true);
+
+		TextField createCode = new TextField();
+		TextField enterCode = new TextField();
+
 		joinQueue.setOnAction(e -> {
 			queueStatus.setText("Waiting for opponent!");
 			clientConnection.send(new Message(true, username.getText()));
@@ -184,7 +194,46 @@ public class GuiClient extends Application{
 		});
 		Text profileStatsTitle = new Text("Stats");
 
-		HBox profileButtons = new HBox(joinQueue, profileQuit);
+		createCode.setPromptText("Create a room password");
+		createCode.setDisable(true);
+		startPrivateGame.setOnAction(e -> {
+			enterCode.setDisable(true);
+			createCode.setDisable(false);
+			submitRoom.setDisable(true);
+			joinRoom.setDisable(true);
+
+			//Leave the queue if you are in it
+			if (queueStatus.getText().equals("Waiting for opponent!")) {
+				clientConnection.send(new Message(false, username.getText()));
+				queueStatus.setText("Left the queue!");
+				joinQueue.setDisable(false);
+			}
+		});
+
+		enterCode.setPromptText("Enter a room password");
+		enterCode.setDisable(true);
+		joinPrivateGame.setOnAction(e -> {
+			createCode.setDisable(true);
+			enterCode.setDisable(false);
+			submitRoom.setDisable(true);
+			joinRoom.setDisable(true);
+
+			//Leave the queue if you are in it
+			if (queueStatus.getText().equals("Waiting for opponent!")) {
+				clientConnection.send(new Message(false, username.getText()));
+				queueStatus.setText("Left the queue!");
+				joinQueue.setDisable(false);
+			}
+		});
+
+		createCode.setOnKeyPressed(e -> {
+            submitRoom.setDisable(createCode.getText().isEmpty());
+		});
+		enterCode.setOnKeyPressed(e -> {
+			joinRoom.setDisable(enterCode.getText().isEmpty());
+		});
+
+		HBox profileButtons = new HBox(20, new VBox(15,joinQueue, startPrivateGame, joinPrivateGame),new VBox(15,queueStatus, createCode, enterCode), new VBox(15,profileQuit, submitRoom, joinRoom));
 		Button gametest = new Button("game test");
 		gametest.setOnAction(e->displayGame(primaryStage));
 
@@ -195,7 +244,7 @@ public class GuiClient extends Application{
 		Text winLossRatioText = new Text("wins:losses");
 		HBox profileStats = new HBox(profileWinningStatsText, winLossRatioText);
 
-		VBox mainProfile = new VBox(profileUsername, profileButtons, queueStatus, profileStats, gametest);
+		VBox mainProfile = new VBox(profileUsername, profileButtons, profileStats, gametest);
 		Scene profilePage = new Scene(mainProfile, 700, 700);
 		// PROFILE PAGE GUI END ====================================================================================================
 
