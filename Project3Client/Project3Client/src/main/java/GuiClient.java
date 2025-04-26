@@ -118,11 +118,6 @@ public class GuiClient extends Application{
 					((GamePiece) child).changeColor(-1);
 				});
 
-<<<<<<< HEAD
-				// actually clicking will drop the piece
-				child.setOnMousePressed(event -> { // TODO change color depending on player
-					((GamePiece) child).changeColor(1);
-=======
 				child.setOnMousePressed(event -> {
 					// Search from bottom row upwards
 					for (int row = 5; row >= 0; row--) {
@@ -141,7 +136,6 @@ public class GuiClient extends Application{
 							}
 						}
 					}
->>>>>>> 209df69 (Got private rooms working! Started on sending moves)
 				});
 
 
