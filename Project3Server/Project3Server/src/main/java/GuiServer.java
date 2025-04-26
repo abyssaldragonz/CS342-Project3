@@ -26,7 +26,6 @@ public class GuiServer extends Application{
 
 	HBox lists;
 	
-	
 	public static void main(String[] args) {
 		launch(args);
 	}
@@ -53,6 +52,10 @@ public class GuiServer extends Application{
 						break;
 					case LEFTQUEUE:
 						listItems.getItems().add(data.message);
+						break;
+					case GAMESTART:
+						listItems.getItems().add("testing!");
+						break;
 				}
 			});
 		});
@@ -62,6 +65,9 @@ public class GuiServer extends Application{
 		listUsers = new ListView<String>();
 
 		lists = new HBox(listUsers,listItems);
+
+		//we could also make a listItems for seperate games
+		//to keep track of the moves
 
 
 		BorderPane pane = new BorderPane();
@@ -82,7 +88,7 @@ public class GuiServer extends Application{
         });
 
 		primaryStage.setScene(new Scene(pane, 500, 400));
-		primaryStage.setTitle("This is the Server");
+		primaryStage.setTitle("Server GUI!");
 		primaryStage.show();
 		
 	}

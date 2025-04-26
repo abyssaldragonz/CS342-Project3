@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.function.Consumer;
 
 import javafx.util.Pair;
@@ -15,8 +16,10 @@ public class Server{
 	ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
 	TheServer server;
 	private Consumer<Message> callback;
-	ArrayList<GuiGame> currentGames = new ArrayList<>();
+	HashMap<Integer, GuiGame> currentGames = new HashMap<>();
 	ArrayList<ClientThread> waitingQueue = new ArrayList<>();
+	HashMap<String, ClientThread> privateRooms = new HashMap<>();
+	int gameNumber = 0;
 
 	Server(Consumer<Message> call){
 		callback = call;
@@ -96,10 +99,16 @@ public class Server{
 						if (waitingQueue.size() >= 2) {
 							ClientThread player1 = waitingQueue.remove(0);
 							ClientThread player2 = waitingQueue.remove(0);
-							currentGames.add(new GuiGame(player1, player2));
+							currentGames.put(gameNumber, new GuiGame(player1, player2));
 							//Notify users that the games have started
-							Message pairMessage1 = new Message(true, player1.username, player2.username);
-							Message pairMessage2 = new Message(true, player2.username, player1.username);
+							Message pairMessage1 = new Message(true, player1.username, player2.username, gameNumber);
+							Message pairMessage2 = new Message(true, player2.username, player1.username, gameNumber);
+
+							gameNumber++;
+
+							//remove them from the hashmap of room codes if they are in it
+							privateRooms.entrySet().removeIf(entry -> entry.getValue() == player1 || entry.getValue() == player2);
+
 							//send out the messages
 							try {
 								player1.out.writeObject(pairMessage1);
@@ -108,12 +117,61 @@ public class Server{
 								System.err.println("New User Error");
 							}
 
-							callback.accept(new Message("Server", player1.username + " matched with " + player2.username));
+							callback.accept(new Message("Server", player1.username + " matched with " + player2.username + " with game number " + gameNumber));
 						}
 					break;
 					case LEFTQUEUE:
 						waitingQueue.remove(this);
 					break;
+					case NEWROOMCODE:
+						Message isRoomCodeFreeMessage;
+						if(privateRooms.containsKey(message.message) || privateRooms.containsValue(this)) {
+							isRoomCodeFreeMessage = new Message(false, false);
+						} else {
+							isRoomCodeFreeMessage = new Message(false, true);
+							privateRooms.put(message.message, this);
+							callback.accept(new Message("Server", message.sender + " started a room with code: " + message.message));
+						}
+
+						for(ClientThread t : clients) {
+							if (t.username.equals(message.sender)) {
+								try {
+									t.out.writeObject(isRoomCodeFreeMessage);
+								} catch (Exception e) {
+									System.err.println("Error message write Error");
+								}
+							}
+						}
+					break;
+					case JOINPRIVATE:
+						if (privateRooms.containsKey(message.message)) {
+							ClientThread roomHost = privateRooms.get(message.message);
+							currentGames.put(gameNumber, new GuiGame(roomHost, this));
+
+							//let them know the game started
+							Message pairMessage1 = new Message(true, roomHost.username, this.username, gameNumber);
+							Message pairMessage2 = new Message(true, this.username, roomHost.username, gameNumber);
+
+							gameNumber++;
+							//send out the messages
+							try {
+								roomHost.out.writeObject(pairMessage1);
+								this.out.writeObject(pairMessage2);
+							} catch (Exception e) {
+								System.err.println("Error starting private room");
+							}
+
+							// remove their room code
+							privateRooms.remove(message.message);
+							callback.accept(new Message("Server", this.username + " joined " + roomHost.username + "'s private room with game number " + gameNumber));
+						} else {
+							Message roomFail = new Message(true, false);
+							try {
+								this.out.writeObject(roomFail);
+							} catch (Exception e) {
+								System.err.println("Failed to send join failure");
+							}
+						}
 				}
 
 			}

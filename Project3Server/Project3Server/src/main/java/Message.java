@@ -1,5 +1,6 @@
 import java.io.Serializable;
 
+
 public class Message implements Serializable {
     static final long serialVersionUID = 42L;
     MessageType type;
@@ -7,6 +8,9 @@ public class Message implements Serializable {
     String recipient;
     String sender;
     boolean bool;
+    int ID;
+    int move;
+
 
     public Message(String name, boolean connect){
         if(connect) {
@@ -26,13 +30,40 @@ public class Message implements Serializable {
         bool = inpBool;
     }
 
+    //
+    public Message(boolean filler, boolean inpBool){
+        if (!filler)
+            type = MessageType.ROOMWORKS;
+        else
+            type = MessageType.ROOMNOTOPEN;
+        bool = inpBool;
+    }
+
     public Message(String rec, String mess){
         type = MessageType.TEXT;
         message = mess;
         recipient = rec;
     }
+
     public Message(String rec, String sen, String mess){
         type = MessageType.TEXT;
+        message = mess;
+        sender = sen;
+        recipient = rec;
+    }
+
+    public Message(String rec, String sen, String mess, String mess2){
+        if (rec.equals("Server")) {
+            if (mess2.equals("NEWROOM")) {
+                type = MessageType.NEWROOMCODE;
+            }
+            if (mess2.equals("JOINROOM")) {
+                type = MessageType.JOINPRIVATE;
+            }
+        }
+        else {
+            type = MessageType.TEXT;
+        }
         message = mess;
         sender = sen;
         recipient = rec;
@@ -50,13 +81,20 @@ public class Message implements Serializable {
         }
     }
 
-    public Message(boolean gameStarted, String name1, String name2){
+    public Message(boolean gameStarted, String rec, String sen, int gameNum){
         if(gameStarted) {
             type = MessageType.GAMESTART;
-            message = "You are matched with " + name2 + "!";
-            sender = name2;
-            recipient = name1;
+            message = "You are matched with " + sen + "!";
+            sender = sen;
+            recipient = rec;
+            ID = gameNum;
         }
     }
+    public Message(int gameNum, String sen, int row){
+        ID = gameNum;
+        move = row;
+        type = MessageType.MAKEMOVE;
+        sender = sen;
 
+    }
 }

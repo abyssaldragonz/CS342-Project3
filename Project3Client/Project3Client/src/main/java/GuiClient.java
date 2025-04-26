@@ -38,7 +38,7 @@ public class GuiClient extends Application{
 	//This is the primary game scene
 	//Changes will be made depending on what moves are read
 	// A copy of this should probably also be stored on the server side
-	private void displayGame(Stage primaryStage) {
+	private void displayGame(Stage primaryStage, int gameNumber) {
 		class GamePiece extends Circle {
 			private int color;
 			private int row;
@@ -118,10 +118,32 @@ public class GuiClient extends Application{
 					((GamePiece) child).changeColor(-1);
 				});
 
+<<<<<<< HEAD
 				// actually clicking will drop the piece
 				child.setOnMousePressed(event -> { // TODO change color depending on player
 					((GamePiece) child).changeColor(1);
+=======
+				child.setOnMousePressed(event -> {
+					// Search from bottom row upwards
+					for (int row = 5; row >= 0; row--) {
+						for (Node piece : gameBoard.getChildren()) {
+							Integer pieceRow = GridPane.getRowIndex(piece);
+							Integer pieceCol = GridPane.getColumnIndex(piece);
+							if (pieceRow == null) pieceRow = 0;
+							if (pieceCol == null) pieceCol = 0;
+
+							if (pieceRow == row && pieceCol == column) {
+								if (piece instanceof GamePiece && ((GamePiece) piece).color == -1) {
+									((GamePiece) piece).changeColor(0);
+									clientConnection.send(new Message(gameNumber,this.username.getText(),pieceRow));
+									return;
+								}
+							}
+						}
+					}
+>>>>>>> 209df69 (Got private rooms working! Started on sending moves)
 				});
+
 
 			}
 		}
@@ -237,9 +259,17 @@ public class GuiClient extends Application{
 			joinRoom.setDisable(enterCode.getText().isEmpty());
 		});
 
+		submitRoom.setOnAction(e -> {
+			clientConnection.send(new Message("Server", username.getText(), createCode.getText(), "NEWROOM"));
+		});
+
+		joinRoom.setOnAction(e -> {
+			clientConnection.send(new Message("Server", username.getText(), enterCode.getText(), "JOINROOM"));
+		});
+
 		HBox profileButtons = new HBox(20, new VBox(15,joinQueue, startPrivateGame, joinPrivateGame),new VBox(15,queueStatus, createCode, enterCode), new VBox(15,profileQuit, submitRoom, joinRoom));
 		Button gametest = new Button("game test");
-		gametest.setOnAction(e->displayGame(primaryStage));
+		gametest.setOnAction(e->displayGame(primaryStage,0));
 
 		Text numWinsText = new Text(" wins");
 		Text numLossesText = new Text(" losses");
@@ -285,11 +315,10 @@ public class GuiClient extends Application{
 							listItems.getItems().add(data.message);
 							currentOpponent = data.sender;
 							queueStatus.setText(""); //reset queue status
-							displayGame(primaryStage);
+							displayGame(primaryStage, data.ID);
 							break;
 						case NAMECHECK:
 							if (!data.bool) {
-								// tell them!
 								nameTakenMessage.setText("This username is already taken");
 								try {
 									clientConnection.socketClient.close();
@@ -297,6 +326,21 @@ public class GuiClient extends Application{
 							} else {
 								profileUsername.setText("@" + username.getText());
 								primaryStage.setScene(profilePage);
+							}
+						break;
+						case ROOMWORKS:
+							if (data.bool) {
+								// Room created or joined successfully!
+								queueStatus.setText("Room created! Waiting for opponent...");
+							} else {
+								queueStatus.setText("Room code already taken or you already have code");
+							}
+							break;
+						case ROOMNOTOPEN:
+							if (data.bool) {
+								queueStatus.setText("Joining room");
+							} else {
+								queueStatus.setText("Incorrect room code");
 							}
 					}
 				});
