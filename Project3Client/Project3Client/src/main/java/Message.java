@@ -70,7 +70,7 @@ public class Message implements Serializable {
     }
 
     public Message(boolean joinedQueue, String name){
-        if(joinedQueue) {
+        if (joinedQueue) {
             type = MessageType.WAITINGINQUEUE;
             message = name +" is waiting in queue";
             recipient = name;
