@@ -119,7 +119,7 @@ public class GuiClient extends Application{
 				});
 
 				// actually clicking will drop the piece
-				child.setOnMousePressed(event -> { // TODO
+				child.setOnMousePressed(event -> { // TODO change color depending on player
 					((GamePiece) child).changeColor(1);
 				});
 
