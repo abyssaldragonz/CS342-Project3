@@ -40,6 +40,33 @@ public class GuiClient extends Application{
 		launch(args);
 	}
 
+	private void showInGamePopup(Stage primaryStage, Scene profilePage, String result) {
+		StackPane popup = new StackPane();
+		popup.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7);");
+		popup.setPrefSize(400, 400);
+
+		Text resultText = new Text(result);
+		resultText.setStyle("-fx-font-size: 48px; -fx-fill: white;");
+
+		Button backButton = new Button("Back to Profile");
+		backButton.setOnAction(e -> {
+			primaryStage.setScene(profilePage);
+		});
+
+		Button playAgain = new Button("Rematch(0/2)");
+		playAgain.setOnAction(e -> {
+
+		});
+
+		VBox popupContent = new VBox(20, resultText, backButton, playAgain);
+		popupContent.setAlignment(Pos.CENTER);
+
+		popup.getChildren().add(popupContent);
+
+		((Pane) clientBox.getParent()).getChildren().add(popup); // Adds it on top
+	}
+
+
 	private class GamePiece extends Circle {
 		private int color;
 		private int row;
@@ -117,7 +144,6 @@ public class GuiClient extends Application{
 			if ( (child instanceof GamePiece)) {
 				child.setOnMouseEntered(event -> {
 					if (!myTurn) return;
-					System.out.println(myPlayerNumber);
 					if (myPlayerNumber == 0) {
 						((GamePiece) child).changeColor(10);
 					} else {
@@ -161,9 +187,6 @@ public class GuiClient extends Application{
 
 		Scene gameScene = new Scene(gameRoot, 750, 450);
 		primaryStage.setTitle("CONNECT FOUR GAME #");
-
-
-
 		primaryStage.setScene(gameScene);
 	}
 
@@ -275,14 +298,7 @@ public class GuiClient extends Application{
 		Button gametest = new Button("game test");
 		gametest.setOnAction(e->displayGame(primaryStage,0));
 
-		Text numWinsText = new Text(" wins");
-		Text numLossesText = new Text(" losses");
-		Text numTiesText = new Text(" ties");
-		VBox profileWinningStatsText = new VBox(profileStatsTitle, numWinsText, numLossesText, numTiesText);
-		Text winLossRatioText = new Text("wins:losses");
-		HBox profileStats = new HBox(profileWinningStatsText, winLossRatioText);
-
-		VBox mainProfile = new VBox(profileUsername, profileButtons, profileStats, gametest);
+		VBox mainProfile = new VBox(profileUsername, profileButtons, gametest);
 		Scene profilePage = new Scene(mainProfile, 700, 700);
 		// PROFILE PAGE GUI END ====================================================================================================
 
@@ -310,10 +326,22 @@ public class GuiClient extends Application{
 							break;
 						case DISCONNECT:
 							if (currentOpponent != null && currentOpponent.equals(data.recipient))
+							{
 								listItems.getItems().add(data.recipient + " has disconnected!");
+								showInGamePopup(primaryStage, profilePage, "You Win!");
+							}
 							break;
 						case TEXT:
 							listItems.getItems().add(data.sender+": "+ data.message);
+							if (data.sender.equals("Server")) {
+								if (data.message.equals("You win!")) {
+									showInGamePopup(primaryStage, profilePage, "You Win!");
+								} else if (data.message.equals("You lose.")) {
+									showInGamePopup(primaryStage, profilePage, "You Lose.");
+								} else if (data.message.equals("You tied!")) {
+									showInGamePopup(primaryStage, profilePage, "It's a Tie.");
+								}
+							}
 							break;
 						case GAMESTART:
 							listItems.getItems().add(data.message);
@@ -341,7 +369,8 @@ public class GuiClient extends Application{
 							break;
 						case ROOMWORKS:
 							if (data.bool) {
-								// Room created or joined successfully!
+								if (queueStatus.getText().equals("Waiting for opponent!"))
+									clientConnection.send(new Message(false, username.getText()));
 								queueStatus.setText("Room created! Waiting for opponent...");
 							} else {
 								queueStatus.setText("Room code already taken or you already have code");
@@ -349,6 +378,8 @@ public class GuiClient extends Application{
 							break;
 						case ROOMNOTOPEN:
 							if (data.bool) {
+								if (queueStatus.getText().equals("Waiting for opponent!"))
+									clientConnection.send(new Message(false, username.getText()));
 								queueStatus.setText("Joining room");
 							} else {
 								queueStatus.setText("Incorrect room code");
@@ -373,11 +404,10 @@ public class GuiClient extends Application{
 								}
 							}
 							// flip the player turn
-							if (player != myPlayerNumber) {
+							if (player != myPlayerNumber)
 								myTurn = true;
-							} else {
+							else
 								myTurn = false;
-							}
 							break;
 					}
 				});
