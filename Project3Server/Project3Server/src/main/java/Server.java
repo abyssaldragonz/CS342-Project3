@@ -101,8 +101,8 @@ public class Server{
 							ClientThread player2 = waitingQueue.remove(0);
 							currentGames.put(gameNumber, new GuiGame(player1, player2));
 							//Notify users that the games have started
-							Message pairMessage1 = new Message(true, player1.username, player2.username, gameNumber);
-							Message pairMessage2 = new Message(true, player2.username, player1.username, gameNumber);
+							Message pairMessage1 = new Message(true, player1.username, player2.username, gameNumber, true);
+							Message pairMessage2 = new Message(true, player2.username, player1.username, gameNumber, false);
 
 							gameNumber++;
 
@@ -149,8 +149,8 @@ public class Server{
 							currentGames.put(gameNumber, new GuiGame(roomHost, this));
 
 							//let them know the game started
-							Message pairMessage1 = new Message(true, roomHost.username, this.username, gameNumber);
-							Message pairMessage2 = new Message(true, this.username, roomHost.username, gameNumber);
+							Message pairMessage1 = new Message(true, roomHost.username, this.username, gameNumber, true);
+							Message pairMessage2 = new Message(true, this.username, roomHost.username, gameNumber, false);
 
 							gameNumber++;
 							//send out the messages
@@ -175,13 +175,52 @@ public class Server{
 					break;
 					case MAKEMOVE:
 						GuiGame game = currentGames.get(message.ID);
+						if (game == null) return;
 						int column = message.moveCol;
 						int row = message.moveRow;
 						String currPlayer = message.sender;
 
-						game.gameState.placePiece(game.gameState.playerToInt.get(currPlayer), column);
-						game.sendMoveToPlayers(new Message(message.ID, game.gameState.playerToInt.get(currPlayer), row, column));
+						//return if the wrong player is trying to move
+						int movingPlayer = game.gameState.playerToInt.get(currPlayer);
+						if (movingPlayer != game.gameState.currentPlayer) return;
 
+						game.gameState.placePiece(game.gameState.playerToInt.get(currPlayer), column);
+
+						game.sendMoveToPlayers(new Message(message.ID, game.gameState.playerToInt.get(currPlayer), row, column));
+						int didWin = game.gameState.winState;
+						if (didWin == 0) { // tie
+							try {
+								Message tieMsg = new Message("Server", "Server", "You tied!");
+								game.player1.out.writeObject(tieMsg);
+								game.player2.out.writeObject(tieMsg);
+								callback.accept(new Message("Server", game.player1.username + " tied with " + game.player2.username));
+							} catch (Exception e) {
+								System.err.println("Error sending tie message");
+							}
+							currentGames.remove(message.ID);
+						}
+						else if (didWin == 1) { // currPlayer was the winner
+							try {
+								// Figure out who is winner
+								Server.ClientThread winner = game.gameState.currentPlayer == 0 ? game.player1 : game.player2;
+								Server.ClientThread loser  = game.gameState.currentPlayer == 0 ? game.player2 : game.player1;
+
+								Message winMsg = new Message("Server","Server","You win!");
+								Message loseMsg = new Message("Server","Server", "You lose.");
+
+								winner.out.writeObject(winMsg);
+								loser.out.writeObject(loseMsg);
+
+								callback.accept(new Message("Server", winner.username + " won the game and " + loser.username + " lost."));
+							} catch (Exception e) {
+								System.err.println("Error sending win/lose messages");
+							}
+							currentGames.remove(message.ID);
+						}
+						else {
+							//switch the current player
+							game.gameState.currentPlayer = (game.gameState.currentPlayer == 0) ? 1 : 0;
+						}
 
 				}
 

@@ -1,6 +1,5 @@
 import java.io.Serializable;
 
-
 public class Message implements Serializable {
     static final long serialVersionUID = 42L;
     MessageType type;
@@ -82,13 +81,14 @@ public class Message implements Serializable {
         }
     }
 
-    public Message(boolean gameStarted, String rec, String sen, int gameNum){
+    public Message(boolean gameStarted, String rec, String sen, int gameNum, boolean isFirst){
         if(gameStarted) {
             type = MessageType.GAMESTART;
             message = "You are matched with " + sen + "!";
             sender = sen;
             recipient = rec;
             ID = gameNum;
+            bool = isFirst;
         }
     }
     public Message(int gameNum, String sen, int row, int col){

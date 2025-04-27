@@ -43,11 +43,6 @@ public class GuiGame extends Application{
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		BorderPane pane = new BorderPane();
-		pane.setPadding(new Insets(70));
-		pane.setStyle("-fx-background-color: coral");
-		pane.setStyle("-fx-font-family: 'serif'");
-		
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent t) {
@@ -55,11 +50,6 @@ public class GuiGame extends Application{
                 System.exit(0);
             }
         });
-
-		primaryStage.setScene(new Scene(pane, 500, 400));
-		primaryStage.setTitle("CONNECT FOUR GAME #");
-		primaryStage.show();
-		
 	}
 
 

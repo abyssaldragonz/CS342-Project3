@@ -33,6 +33,9 @@ public class GuiClient extends Application{
 
 	Text profileUsername = new Text("Temp so it doesnt get mad its undefined"); // for profile Section (but needs to be here)
 
+	boolean myTurn = false;
+	int myPlayerNumber = -1;
+
 	public static void main(String[] args) {
 		launch(args);
 	}
@@ -77,7 +80,6 @@ public class GuiClient extends Application{
 	// A copy of this should probably also be stored on the server side
 	private void displayGame(Stage primaryStage, int gameNumber) {
 
-
 		// https://docs.oracle.com/javase/8/javafx/api/javafx/scene/layout/GridPane.html
 		gameBoard = new GridPane();
 		gameBoard.setStyle("-fx-background-color: #53B7F5;\n" +
@@ -113,12 +115,17 @@ public class GuiClient extends Application{
 			Integer c = GridPane.getColumnIndex(child);
 			int column = c == null ? 0 : c;
 			if ( (child instanceof GamePiece)) {
-
 				child.setOnMouseEntered(event -> {
-					((GamePiece) child).changeColor(10);
+					if (!myTurn) return;
+					System.out.println(myPlayerNumber);
+					if (myPlayerNumber == 0) {
+						((GamePiece) child).changeColor(10);
+					} else {
+						((GamePiece) child).changeColor(20);
+					}
 				});
 
-				child.setOnMouseExited(event -> { //
+				child.setOnMouseExited(event -> {
 					((GamePiece) child).changeColor(-1);
 				});
 
@@ -133,7 +140,6 @@ public class GuiClient extends Application{
 
 							if (pieceRow == row && pieceCol == column) {
 								if (piece instanceof GamePiece && ((GamePiece) piece).color == -1) {
-//									((GamePiece) piece).changeColor(0);
 									clientConnection.send(new Message(gameNumber,this.username.getText(),pieceRow, pieceCol));
 									return;
 								}
@@ -312,8 +318,15 @@ public class GuiClient extends Application{
 						case GAMESTART:
 							listItems.getItems().add(data.message);
 							currentOpponent = data.sender;
-							queueStatus.setText(""); //reset queue statushuhujio
+							queueStatus.setText(""); //reset queue status
 							displayGame(primaryStage, data.ID);
+							if (data.bool) {
+								myPlayerNumber = 0;
+								myTurn = true;
+							} else {
+								myPlayerNumber = 1;
+								myTurn = false;
+							}
 							break;
 						case NAMECHECK:
 							if (!data.bool) {
@@ -358,6 +371,12 @@ public class GuiClient extends Application{
 										((GamePiece) piece).changeColor(player);
 									}
 								}
+							}
+							// flip the player turn
+							if (player != myPlayerNumber) {
+								myTurn = true;
+							} else {
+								myTurn = false;
 							}
 							break;
 					}
