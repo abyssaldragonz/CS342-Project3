@@ -9,8 +9,9 @@ public class Message implements Serializable {
     String sender;
     boolean bool;
     int ID;
-    int move;
-
+    int moveRow;
+    int moveCol;
+    int player;
 
     public Message(String name, boolean connect){
         if(connect) {
@@ -90,11 +91,19 @@ public class Message implements Serializable {
             ID = gameNum;
         }
     }
-    public Message(int gameNum, String sen, int row){
-        ID = gameNum;
-        move = row;
+    public Message(int gameNum, String sen, int row, int col){
         type = MessageType.MAKEMOVE;
+        ID = gameNum;
+        moveRow = row;
+        moveCol = col;
         sender = sen;
-
+    }
+    //same thing but with an int player
+    public Message(int gameNum, int play, int row, int col){
+        type = MessageType.MAKEMOVE;
+        ID = gameNum;
+        moveRow = row;
+        moveCol = col;
+        player = play;
     }
 }

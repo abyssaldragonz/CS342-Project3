@@ -29,9 +29,10 @@ public class GuiGame extends Application{
 	public GuiGame(Server.ClientThread p1, Server.ClientThread p2){
 		player1 = p1;
 		player2 = p2;
+		gameState = new GameState(player1, player2);
 	}
 
-	public void sendToPlayers(Message msg) {
+	public void sendMoveToPlayers(Message msg) {
 		try {
 			player1.out.writeObject(msg);
 			player2.out.writeObject(msg);

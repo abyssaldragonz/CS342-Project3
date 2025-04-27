@@ -172,6 +172,17 @@ public class Server{
 								System.err.println("Failed to send join failure");
 							}
 						}
+					break;
+					case MAKEMOVE:
+						GuiGame game = currentGames.get(message.ID);
+						int column = message.moveCol;
+						int row = message.moveRow;
+						String currPlayer = message.sender;
+
+						game.gameState.placePiece(game.gameState.playerToInt.get(currPlayer), column);
+						game.sendMoveToPlayers(new Message(message.ID, game.gameState.playerToInt.get(currPlayer), row, column));
+
+
 				}
 
 			}

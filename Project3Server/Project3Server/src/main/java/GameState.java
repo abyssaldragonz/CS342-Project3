@@ -1,3 +1,5 @@
+import java.util.HashMap;
+
 public class GameState {
     // gameboard for connect four
     // -1 = empty piece
@@ -15,13 +17,20 @@ public class GameState {
     // 1 = winner
     public int winState;
 
+    public HashMap<Integer, String> intToPlayer = new HashMap<>();
+    public HashMap<String, Integer> playerToInt = new HashMap<>();
+
 
     // Default constructor for a new gameboard
-    public GameState() {
+    public GameState(Server.ClientThread p1, Server.ClientThread p2) {
         for (int i = 0; i < MAXROWS; i++) {
             for (int j = 0; j < MAXCOLS; j++)
                 gameBoard[i][j] = -1;
         }
+        intToPlayer.put(0, p1.username);
+        intToPlayer.put(1, p2.username);
+        playerToInt.put(p1.username, 0);
+        playerToInt.put(p2.username, 1);
         currentPlayer = 0;
         winState = -1;
     }
@@ -32,7 +41,6 @@ public class GameState {
     // @return: boolean - whether the piece placement is successful or not
     public boolean placePiece(int player, int placedCol) {
         currentPlayer = player;
-
         // finding the lowest row the piece can be placed in that row
         int currRow = 5;
         while (currRow >= 0) {

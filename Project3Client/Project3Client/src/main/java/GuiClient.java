@@ -19,6 +19,8 @@ public class GuiClient extends Application{
 	HashMap<String, Scene> sceneMap;
 	Client clientConnection;
 
+	GridPane gameBoard;
+
 	VBox clientBox;
 	HBox fields;
 
@@ -35,47 +37,49 @@ public class GuiClient extends Application{
 		launch(args);
 	}
 
+	private class GamePiece extends Circle {
+		private int color;
+		private int row;
+		private int col;
+
+		GamePiece(int r, int c) {
+			row = r;
+			col = c;
+			color = -1;
+			setFill(Color.web("#D9D9D9",1.0));
+			setRadius(25);
+		}
+
+		public void changeColor(int newColor) {
+			color = newColor;
+			switch (color) {
+				case 0:
+					setFill(Color.YELLOW); // yellow goes first
+					break;
+				case 1:
+					setFill(Color.RED); // red goes second
+					break;
+				// for the drop box
+				case 10:
+					setFill(Color.web("#FFFFC5")); // light yellow
+					break;
+				case 20:
+					setFill(Color.web("#FF7F7F")); // light red
+					break;
+				default:
+					setFill(Color.web("#D9D9D9",1.0)); // plain gray
+			}
+		}
+	}
+
 	//This is the primary game scene
 	//Changes will be made depending on what moves are read
 	// A copy of this should probably also be stored on the server side
 	private void displayGame(Stage primaryStage, int gameNumber) {
-		class GamePiece extends Circle {
-			private int color;
-			private int row;
-			private int col;
 
-			GamePiece(int r, int c) {
-				row = r;
-				col = c;
-				color = -1;
-				setFill(Color.web("#D9D9D9",1.0));
-				setRadius(25);
-			}
-
-			public void changeColor(int newColor) {
-				color = newColor;
-				switch (color) {
-					case 0:
-						setFill(Color.YELLOW); // yellow goes first
-						break;
-					case 1:
-						setFill(Color.RED); // red goes second
-						break;
-					// for the drop box
-					case 10:
-						setFill(Color.web("#FFFFC5")); // light yellow
-						break;
-					case 20:
-						setFill(Color.web("#FF7F7F")); // light red
-						break;
-					default:
-						setFill(Color.web("#D9D9D9",1.0)); // plain gray
-				}
-			}
-		}
 
 		// https://docs.oracle.com/javase/8/javafx/api/javafx/scene/layout/GridPane.html
-		GridPane gameBoard = new GridPane();
+		gameBoard = new GridPane();
 		gameBoard.setStyle("-fx-background-color: #53B7F5;\n" +
 				"-fx-width: 500;\n"+
 				"-fx-height: 500;\n");
@@ -110,7 +114,7 @@ public class GuiClient extends Application{
 			int column = c == null ? 0 : c;
 			if ( (child instanceof GamePiece)) {
 
-				child.setOnMouseEntered(event -> { // TODO change color depending on player
+				child.setOnMouseEntered(event -> {
 					((GamePiece) child).changeColor(10);
 				});
 
@@ -129,8 +133,8 @@ public class GuiClient extends Application{
 
 							if (pieceRow == row && pieceCol == column) {
 								if (piece instanceof GamePiece && ((GamePiece) piece).color == -1) {
-									((GamePiece) piece).changeColor(0);
-									clientConnection.send(new Message(gameNumber,this.username.getText(),pieceRow));
+//									((GamePiece) piece).changeColor(0);
+									clientConnection.send(new Message(gameNumber,this.username.getText(),pieceRow, pieceCol));
 									return;
 								}
 							}
@@ -308,7 +312,7 @@ public class GuiClient extends Application{
 						case GAMESTART:
 							listItems.getItems().add(data.message);
 							currentOpponent = data.sender;
-							queueStatus.setText(""); //reset queue status
+							queueStatus.setText(""); //reset queue statushuhujio
 							displayGame(primaryStage, data.ID);
 							break;
 						case NAMECHECK:
@@ -321,7 +325,7 @@ public class GuiClient extends Application{
 								profileUsername.setText("@" + username.getText());
 								primaryStage.setScene(profilePage);
 							}
-						break;
+							break;
 						case ROOMWORKS:
 							if (data.bool) {
 								// Room created or joined successfully!
@@ -336,6 +340,26 @@ public class GuiClient extends Application{
 							} else {
 								queueStatus.setText("Incorrect room code");
 							}
+							break;
+						case MAKEMOVE:
+							int row = data.moveRow;
+							int col = data.moveCol;
+							int player = data.player;
+
+							// Update the board
+							for (Node piece : gameBoard.getChildren()) {
+								Integer pieceRow = GridPane.getRowIndex(piece);
+								Integer pieceCol = GridPane.getColumnIndex(piece);
+								if (pieceRow == null) pieceRow = 0;
+								if (pieceCol == null) pieceCol = 0;
+
+								if (pieceRow == row && pieceCol == col) {
+									if (piece instanceof GamePiece) {
+										((GamePiece) piece).changeColor(player);
+									}
+								}
+							}
+							break;
 					}
 				});
 			}, username.getText()); //send the username from gui to client
