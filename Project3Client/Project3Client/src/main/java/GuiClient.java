@@ -7,10 +7,13 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color; // https://www.tutorialspoint.com/javafx/javafx_colors.htm
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -50,6 +53,7 @@ public class GuiClient extends Application{
 
 		Button backButton = new Button("Back to Profile");
 		backButton.setOnAction(e -> {
+			primaryStage.setTitle("USER PROFILE @" + username.getText());
 			primaryStage.setScene(profilePage);
 		});
 
@@ -173,8 +177,6 @@ public class GuiClient extends Application{
 						}
 					}
 				});
-
-
 			}
 		}
 
@@ -182,11 +184,11 @@ public class GuiClient extends Application{
 
 		VBox mainGame = new VBox(userDropbox, gameBoard);
 
-		Pane gameRoot = new HBox(20, mainGame, clientBox);
+		HBox gameRoot = new HBox(20, mainGame, clientBox);
 		gameRoot.setStyle("-fx-background-color: #D9D9D9;");
 
 		Scene gameScene = new Scene(gameRoot, 750, 450);
-		primaryStage.setTitle("CONNECT FOUR GAME #");
+		primaryStage.setTitle("CONNECT FOUR GAME #" + gameNumber);
 		primaryStage.setScene(gameScene);
 	}
 
@@ -233,12 +235,26 @@ public class GuiClient extends Application{
 		TextField createCode = new TextField();
 		TextField enterCode = new TextField();
 
+		// styling
+		profileUsername.setFont(Font.font("roboto", FontWeight.EXTRA_BOLD, 35));
+		nameTakenMessage.setFont(Font.font("roboto", FontWeight.BOLD, 25));
+		nameTakenMessage.setFill(Color.RED);
+		queueStatus.setFont(Font.font("roboto", FontWeight.BOLD, 25));
+		joinQueue.setFont(Font.font("roboto", 15));
+		startPrivateGame.setFont(Font.font("roboto", 15));
+		joinPrivateGame.setFont(Font.font("roboto", 15));
+		submitRoom.setFont(Font.font("roboto", 15));
+		joinRoom.setFont(Font.font("roboto", 15));
+		createCode.setFont(Font.font("roboto", 15));
+		enterCode.setFont(Font.font("roboto", 15));
+
 		joinQueue.setOnAction(e -> {
 			queueStatus.setText("Waiting for opponent!");
 			clientConnection.send(new Message(true, username.getText()));
 			joinQueue.setDisable(true);
 		});
 		Button profileQuit = new Button("Quit");
+		profileQuit.setFont(Font.font("roboto", FontWeight.BOLD, 15));
 		profileQuit.setOnAction(e -> {
 			if (queueStatus.getText().equals("Waiting for opponent!"))
 				clientConnection.send(new Message(false, username.getText()));
@@ -294,21 +310,26 @@ public class GuiClient extends Application{
 			clientConnection.send(new Message("Server", username.getText(), enterCode.getText(), "JOINROOM"));
 		});
 
-		HBox profileButtons = new HBox(20, new VBox(15,joinQueue, startPrivateGame, joinPrivateGame),new VBox(15,queueStatus, createCode, enterCode), new VBox(15,profileQuit, submitRoom, joinRoom));
-		Button gametest = new Button("game test");
-		gametest.setOnAction(e->displayGame(primaryStage,0));
+		HBox profileButtons = new HBox(20, new VBox(25,joinQueue, startPrivateGame, joinPrivateGame),new VBox(25,queueStatus, createCode, enterCode), new VBox(25,profileQuit, submitRoom, joinRoom));
 
-		VBox mainProfile = new VBox(profileUsername, profileButtons, gametest);
+		VBox mainProfile = new VBox(10, profileUsername, profileButtons);
+		mainProfile.setStyle("-fx-padding: 25px;\n" );
 		Scene profilePage = new Scene(mainProfile, 700, 700);
 		// PROFILE PAGE GUI END ====================================================================================================
 
 
 		// CREATE ACCOUNT GUI START ====================================================================================================
+		Text welcomeToConnectFour = new Text("CONNECT FOUR");
+		welcomeToConnectFour.setFont(Font.font("roboto", FontWeight.EXTRA_BOLD, 55));
+		welcomeToConnectFour.setFill(Color.RED);
 		Text t0 = new Text("Create Account");
-		t0.setFont(Font.font("serif", 20)); //idk what font we want to change the size
+		t0.setFont(Font.font("roboto", 35));
 		Text t1 = new Text("username");
+		t1.setFont(Font.font("roboto", 25));
 		username = new TextField();
+		username.setFont(Font.font("roboto", 15));
 		Button create = new Button("Create");
+		create.setFont(Font.font("roboto", 15));
 
 		// On create button click
 		create.setOnAction(e->{
@@ -347,6 +368,8 @@ public class GuiClient extends Application{
 							listItems.getItems().add(data.message);
 							currentOpponent = data.sender;
 							queueStatus.setText(""); //reset queue status
+							createCode.setText("");
+							enterCode.setText("");
 							displayGame(primaryStage, data.ID);
 							if (data.bool) {
 								myPlayerNumber = 0;
@@ -358,12 +381,14 @@ public class GuiClient extends Application{
 							break;
 						case NAMECHECK:
 							if (!data.bool) {
+								// tell them!
 								nameTakenMessage.setText("This username is already taken");
 								try {
 									clientConnection.socketClient.close();
 								} catch (Exception e1) { e1.printStackTrace(); }
 							} else {
 								profileUsername.setText("@" + username.getText());
+								primaryStage.setTitle("USER PROFILE @" + username.getText());
 								primaryStage.setScene(profilePage);
 							}
 							break;
@@ -415,12 +440,12 @@ public class GuiClient extends Application{
 			clientConnection.start();
 		});
 
-		VBox createAccountBox = new VBox(5,t0,new HBox(10, t1), username, create, nameTakenMessage);
+		VBox createAccountBox = new VBox(15,welcomeToConnectFour, new Rectangle(10,35, Paint.valueOf("#D9D9D9")), t0, new HBox(10, t1), username, create, nameTakenMessage);
 		createAccountBox.setMaxWidth(400);
 		createAccountBox.setPrefHeight(400);
 		createAccountBox.setMaxHeight(400);
 		createAccountBox.setAlignment(Pos.CENTER);
-		createAccountBox.setStyle("-fx-background-color: #808080; \n");
+		createAccountBox.setStyle("-fx-background-color: #D9D9D9; \n-fx-padding: 15px");
 
 		StackPane createAccountBackground = new StackPane(createAccountBox);
 		createAccountBackground.setStyle("-fx-background-color: #8EF2F5;");

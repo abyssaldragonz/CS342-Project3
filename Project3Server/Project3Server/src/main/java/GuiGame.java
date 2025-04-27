@@ -19,7 +19,6 @@ import javafx.stage.WindowEvent;
 public class GuiGame extends Application{
 
 	Server serverConnection;
-
 	Server.ClientThread player1;
 	Server.ClientThread player2;
 

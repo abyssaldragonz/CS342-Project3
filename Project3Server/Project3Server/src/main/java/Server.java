@@ -28,7 +28,6 @@ public class Server{
 	}
 
 	public class TheServer extends Thread{
-		
 		public void run() {
 			try(ServerSocket mysocket = new ServerSocket(5555);){
 		    System.out.println("Server is waiting for a client!");
