@@ -95,6 +95,10 @@ public class Server{
 						//add to our waiting queue
 						if (!waitingQueue.contains(this))
 							waitingQueue.add(this);
+
+						// remove from private rooms
+						privateRooms.entrySet().removeIf(entry -> entry.getValue() == this);
+
 						if (waitingQueue.size() >= 2) {
 							ClientThread player1 = waitingQueue.remove(0);
 							ClientThread player2 = waitingQueue.remove(0);
@@ -112,6 +116,7 @@ public class Server{
 							try {
 								player1.out.writeObject(pairMessage1);
 								player2.out.writeObject(pairMessage2);
+								callback.accept(new Message(true, player1.username, player2.username, gameNumber - 1, true));
 							} catch (Exception e) {
 								System.err.println("New User Error");
 							}
@@ -156,6 +161,8 @@ public class Server{
 							try {
 								roomHost.out.writeObject(pairMessage1);
 								this.out.writeObject(pairMessage2);
+								callback.accept(new Message(true, roomHost.username, this.username, gameNumber - 1, true));
+
 							} catch (Exception e) {
 								System.err.println("Error starting private room");
 							}
@@ -220,7 +227,56 @@ public class Server{
 							//switch the current player
 							game.gameState.currentPlayer = (game.gameState.currentPlayer == 0) ? 1 : 0;
 						}
+						break;
+					case JOINEDREMATCH:
+						String rematchKey = (message.recipient.compareTo(message.sender) < 0) ? message.recipient + message.sender : message.sender + message.recipient;
+						if (message.bool) {
+							if (privateRooms.containsKey(rematchKey)) {
+								ClientThread roomHost = privateRooms.get(rematchKey);
+								currentGames.put(gameNumber, new GuiGame(roomHost, this));
 
+								//let them know the game started
+								Message pairMessage1 = new Message(true, roomHost.username, this.username, gameNumber, true);
+								Message pairMessage2 = new Message(true, this.username, roomHost.username, gameNumber, false);
+
+								gameNumber++;
+								//send out the messages
+								try {
+									roomHost.out.writeObject(pairMessage1);
+									this.out.writeObject(pairMessage2);
+									callback.accept(new Message(true, roomHost.username, this.username, gameNumber - 1, true));
+								} catch (Exception e) {
+									System.err.println("Error starting rematch");
+								}
+
+								// remove their room code
+								privateRooms.remove(rematchKey);
+								callback.accept(new Message("Server", this.username + " rematched " + roomHost.username + "with game number " + gameNumber));
+
+							} else {
+								privateRooms.put(rematchKey, this);
+								for(ClientThread t : clients) {
+									if (t.username.equals(message.recipient) || t.username.equals(message.sender)) {
+										try {
+											t.out.writeObject(message);
+										} catch (Exception e) {
+											System.err.println("rematch Error");
+										}
+									}
+								}
+							}
+						} else {
+                            privateRooms.remove(rematchKey);
+							for(ClientThread t : clients) {
+								if (t.username.equals(message.recipient) || t.username.equals(message.sender)) {
+									try {
+										t.out.writeObject(message);
+									} catch (Exception e) {
+										System.err.println("rematch Error");
+									}
+								}
+							}
+						}
 				}
 
 			}

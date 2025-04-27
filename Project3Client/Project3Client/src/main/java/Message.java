@@ -81,6 +81,13 @@ public class Message implements Serializable {
         }
     }
 
+    public Message(boolean joinedRematch, String rec, String sen){
+            type = MessageType.JOINEDREMATCH;
+            bool = joinedRematch;
+            recipient = rec;
+            sender = sen;
+    }
+
     public Message(boolean gameStarted, String rec, String sen, int gameNum, boolean isFirst){
         if(gameStarted) {
             type = MessageType.GAMESTART;

@@ -39,6 +39,11 @@ public class GuiClient extends Application{
 	boolean myTurn = false;
 	int myPlayerNumber = -1;
 
+	boolean gameEnded = false;
+
+	Button playAgain;
+	Button joinQueue;
+
 	public static void main(String[] args) {
 		launch(args);
 	}
@@ -53,13 +58,15 @@ public class GuiClient extends Application{
 
 		Button backButton = new Button("Back to Profile");
 		backButton.setOnAction(e -> {
+			clientConnection.send(new Message(false, currentOpponent, username.getText()));
 			primaryStage.setTitle("USER PROFILE @" + username.getText());
 			primaryStage.setScene(profilePage);
 		});
 
-		Button playAgain = new Button("Rematch(0/2)");
+		playAgain = new Button("Rematch(0/2)");
 		playAgain.setOnAction(e -> {
-
+			playAgain.setDisable(true);
+			clientConnection.send(new Message(true, currentOpponent, username.getText()));
 		});
 
 		VBox popupContent = new VBox(20, resultText, backButton, playAgain);
@@ -67,7 +74,8 @@ public class GuiClient extends Application{
 
 		popup.getChildren().add(popupContent);
 
-		((Pane) clientBox.getParent()).getChildren().add(popup); // Adds it on top
+		((Pane) clientBox.getParent()).getChildren().add(popup);
+		joinQueue.setDisable(false);
 	}
 
 
@@ -224,7 +232,7 @@ public class GuiClient extends Application{
 
 		// PROFILE PAGE GUI START ====================================================================================================
 		//moved profileUsername to within create button press bc here it is still nothing
-		Button joinQueue = new Button("Join public queue");
+		joinQueue = new Button("Join public queue");
 		Button startPrivateGame = new Button("Start private game");
 		Button joinPrivateGame = new Button("Join private game");
 		Button submitRoom = new Button("Submit room");
@@ -261,7 +269,6 @@ public class GuiClient extends Application{
 			Platform.exit();
 			System.exit(0);
 		});
-		Text profileStatsTitle = new Text("Stats");
 
 		createCode.setPromptText("Create a room password");
 		createCode.setDisable(true);
@@ -303,10 +310,22 @@ public class GuiClient extends Application{
 		});
 
 		submitRoom.setOnAction(e -> {
+			//Leave the queue if you are in it
+			if (queueStatus.getText().equals("Waiting for opponent!")) {
+				clientConnection.send(new Message(false, username.getText()));
+				queueStatus.setText("Left the queue!");
+				joinQueue.setDisable(false);
+			}
 			clientConnection.send(new Message("Server", username.getText(), createCode.getText(), "NEWROOM"));
 		});
 
 		joinRoom.setOnAction(e -> {
+			//Leave the queue if you are in it
+			if (queueStatus.getText().equals("Waiting for opponent!")) {
+				clientConnection.send(new Message(false, username.getText()));
+				queueStatus.setText("Left the queue!");
+				joinQueue.setDisable(false);
+			}
 			clientConnection.send(new Message("Server", username.getText(), enterCode.getText(), "JOINROOM"));
 		});
 
@@ -349,7 +368,10 @@ public class GuiClient extends Application{
 							if (currentOpponent != null && currentOpponent.equals(data.recipient))
 							{
 								listItems.getItems().add(data.recipient + " has disconnected!");
-								showInGamePopup(primaryStage, profilePage, "You Win!");
+								if (!gameEnded) {
+									showInGamePopup(primaryStage, profilePage, "You Win!");
+									gameEnded = true;
+								}
 							}
 							break;
 						case TEXT:
@@ -362,9 +384,11 @@ public class GuiClient extends Application{
 								} else if (data.message.equals("You tied!")) {
 									showInGamePopup(primaryStage, profilePage, "It's a Tie.");
 								}
+								gameEnded = true;
 							}
 							break;
 						case GAMESTART:
+							gameEnded = false;
 							listItems.getItems().add(data.message);
 							currentOpponent = data.sender;
 							queueStatus.setText(""); //reset queue status
@@ -434,6 +458,12 @@ public class GuiClient extends Application{
 							else
 								myTurn = false;
 							break;
+						case JOINEDREMATCH:
+							if (data.bool)
+								playAgain.setText("Rematch(1/2)");
+							else
+								playAgain.setText("Rematch(0/2)");
+
 					}
 				});
 			}, username.getText()); //send the username from gui to client

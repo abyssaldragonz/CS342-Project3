@@ -24,6 +24,9 @@ public class GuiServer extends Application{
 	ListView<String> listItems;
 	ListView<String> listUsers;
 
+	HashMap<Integer, ListView<String>> gameMoves = new HashMap<>();
+	VBox gamesBox = new VBox(10);
+
 	HBox lists;
 	
 	public static void main(String[] args) {
@@ -54,8 +57,15 @@ public class GuiServer extends Application{
 						listItems.getItems().add(data.message);
 						break;
 					case GAMESTART:
-						listItems.getItems().add("testing!");
+						ListView<String> moveList = new ListView<>();
+						moveList.getItems().add("Game #" + data.ID + " Moves:");
+						gameMoves.put(data.ID, moveList);
+						gamesBox.getChildren().add(moveList);
 						break;
+					case MAKEMOVE:
+						if (gameMoves.containsKey(data.ID)) {
+							gameMoves.get(data.ID).getItems().add(data.sender + " moved at (" + data.moveRow + "," + data.moveCol + ")");
+						}
 				}
 			});
 		});
@@ -64,7 +74,8 @@ public class GuiServer extends Application{
 		listItems = new ListView<String>();
 		listUsers = new ListView<String>();
 
-		lists = new HBox(listUsers,listItems);
+		lists = new HBox(20, listUsers, listItems, gamesBox);
+
 
 		//we could also make a listItems for seperate games
 		//to keep track of the moves
