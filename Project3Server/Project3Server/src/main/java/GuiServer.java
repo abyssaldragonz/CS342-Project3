@@ -1,17 +1,12 @@
-
 import java.util.HashMap;
-import java.util.function.Consumer;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -78,10 +73,12 @@ public class GuiServer extends Application{
 
 		
 		listItems = new ListView<String>();
+		listItems.setPrefWidth(350);
 		listUsers = new ListView<String>();
 
-		lists = new HBox(20, new VBox(new Text("PLAYERS"), listUsers), new VBox(new Text("ACTIVITY"), listItems), new VBox(new Text("GAMES"), gamesBox));
-
+		ScrollPane gameListPane = new ScrollPane(gamesBox);
+		gameListPane.setStyle("-fx-padding: 25px");
+		lists = new HBox(20, new VBox(new Text("PLAYERS"), listUsers), new VBox(new Text("ACTIVITY"), listItems), new VBox(new Text("GAMES"), gameListPane));
 
 		//we could also make a listItems for seperate games
 		//to keep track of the moves
@@ -93,7 +90,7 @@ public class GuiServer extends Application{
 
 		pane.setCenter(lists);
 		pane.setStyle("-fx-font-family: 'serif'");
-		;
+
 
 		
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -104,7 +101,7 @@ public class GuiServer extends Application{
             }
         });
 
-		primaryStage.setScene(new Scene(pane, 700, 700));
+		primaryStage.setScene(new Scene(pane, 1000, 700));
 		primaryStage.setTitle("Server GUI!");
 		primaryStage.show();
 		

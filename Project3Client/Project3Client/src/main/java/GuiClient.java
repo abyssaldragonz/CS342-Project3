@@ -1,4 +1,3 @@
-import java.util.HashMap;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -19,7 +18,6 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 public class GuiClient extends Application{
-	HashMap<String, Scene> sceneMap;
 	Client clientConnection;
 
 	GridPane gameBoard;
@@ -48,7 +46,7 @@ public class GuiClient extends Application{
 		launch(args);
 	}
 
-	private void showInGamePopup(Stage primaryStage, Scene profilePage, String result) {
+	private void showInGamePopup(Stage primaryStage, Scene profilePage, Button forfeit, String result) {
 		StackPane popup = new StackPane();
 		popup.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7);");
 		popup.setPrefSize(400, 400);
@@ -76,6 +74,7 @@ public class GuiClient extends Application{
 
 		((Pane) clientBox.getParent()).getChildren().add(popup);
 		joinQueue.setDisable(false);
+		forfeit.setDisable(true);
 	}
 
 
@@ -117,7 +116,8 @@ public class GuiClient extends Application{
 	//This is the primary game scene
 	//Changes will be made depending on what moves are read
 	// A copy of this should probably also be stored on the server side
-	private void displayGame(Stage primaryStage, int gameNumber) {
+	private void displayGame(Stage primaryStage, int gameNumber, Button forfeit) {
+		forfeit.setDisable(false);
 		gameEnded = false;
 		// https://docs.oracle.com/javase/8/javafx/api/javafx/scene/layout/GridPane.html
 		gameBoard = new GridPane();
@@ -168,7 +168,6 @@ public class GuiClient extends Application{
 				});
 
 				child.setOnMousePressed(event -> {
-					System.out.println(gameEnded);
 					if (gameEnded) return;
 					// Search from bottom row upwards
 					for (int row = 5; row >= 0; row--) {
@@ -198,7 +197,7 @@ public class GuiClient extends Application{
 		gameRoot.setStyle("-fx-background-color: #D9D9D9;");
 
 		Scene gameScene = new Scene(gameRoot, 1000, 450);
-		primaryStage.setTitle("@"+ profileUsername.getText() + "CONNECT FOUR GAME #" + gameNumber + " AGAINST PLAYER @" + currentOpponent);
+		primaryStage.setTitle(profileUsername.getText() + " CONNECT FOUR GAME #" + gameNumber + " AGAINST PLAYER @" + currentOpponent);
 		primaryStage.setScene(gameScene);
 	}
 
@@ -339,8 +338,10 @@ public class GuiClient extends Application{
 		VBox mainProfile = new VBox(10, profileUsername, profileButtons);
 		mainProfile.setStyle("-fx-padding: 25px;\n" );
 		Scene profilePage = new Scene(mainProfile, 700, 500);
+
 		forfeit.setOnAction(e -> {
-			showInGamePopup(primaryStage, profilePage, "You lose.");
+			forfeit.setDisable(true);
+			showInGamePopup(primaryStage, profilePage, forfeit, "You lose.");
 			clientConnection.send(new Message(0, this.username.getText(), currentOpponent));
 			gameEnded = true;
 		});
@@ -367,7 +368,7 @@ public class GuiClient extends Application{
 				return;
 			}
 
-				// we can setup the connection AFTER the button is pressed
+			// we can setup the connection AFTER the button is pressed
 			clientConnection = new Client(data->{
 				Platform.runLater(()->{
 					switch (data.type){
@@ -379,7 +380,7 @@ public class GuiClient extends Application{
 							{
 								listItems.getItems().add(data.recipient + " has disconnected!");
 								if (!gameEnded) {
-									showInGamePopup(primaryStage, profilePage, "You Win!");
+									showInGamePopup(primaryStage, profilePage, forfeit, "You Win!");
 									gameEnded = true;
 								}
 							}
@@ -388,13 +389,13 @@ public class GuiClient extends Application{
 							listItems.getItems().add(data.sender+": "+ data.message);
 							if (data.sender.equals("Server")) {
 								if (data.message.equals("You win!")) {
-									showInGamePopup(primaryStage, profilePage, "You Win!");
+									showInGamePopup(primaryStage, profilePage, forfeit, "You Win!");
 									gameEnded = true;
 								} else if (data.message.equals("You lose.")) {
-									showInGamePopup(primaryStage, profilePage, "You Lose.");
+									showInGamePopup(primaryStage, profilePage, forfeit, "You Lose.");
 									gameEnded = true;
 								} else if (data.message.equals("You tied!")) {
-									showInGamePopup(primaryStage, profilePage, "It's a Tie.");
+									showInGamePopup(primaryStage, profilePage, forfeit, "It's a Tie.");
 									gameEnded = true;
 								}
 							}
@@ -406,7 +407,7 @@ public class GuiClient extends Application{
 							queueStatus.setText(""); //reset queue status
 							createCode.setText("");
 							enterCode.setText("");
-							displayGame(primaryStage, data.ID);
+							displayGame(primaryStage, data.ID, forfeit);
 							if (data.bool) {
 								myPlayerNumber = 0;
 								myTurn = true;
@@ -478,7 +479,7 @@ public class GuiClient extends Application{
 							break;
 						case FORFEIT:
 							listItems.getItems().add("Server: "+ data.message);
-							showInGamePopup(primaryStage, profilePage, "You Win!");
+							showInGamePopup(primaryStage, profilePage, forfeit, "You Win!");
 							gameEnded = true;
 
 					}
