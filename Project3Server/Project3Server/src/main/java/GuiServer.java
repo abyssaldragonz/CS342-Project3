@@ -14,6 +14,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -64,7 +65,11 @@ public class GuiServer extends Application{
 						break;
 					case MAKEMOVE:
 						if (gameMoves.containsKey(data.ID)) {
-							gameMoves.get(data.ID).getItems().add(data.sender + " moved at (" + data.moveRow + "," + data.moveCol + ")");
+							gameMoves.get(data.ID).getItems().add(data.sender + " moved a (row " + data.moveRow + ", col " + data.moveCol + ")");
+						}
+					case FORFEIT:
+						if (gameMoves.containsKey(data.ID)) {
+							listItems.getItems().add(data.recipient + " has forfeited!");
 						}
 				}
 			});
@@ -74,7 +79,7 @@ public class GuiServer extends Application{
 		listItems = new ListView<String>();
 		listUsers = new ListView<String>();
 
-		lists = new HBox(20, listUsers, listItems, gamesBox);
+		lists = new HBox(20, new VBox(new Text("PLAYERS"), listUsers), new VBox(new Text("ACTIVITY"), listItems), new VBox(new Text("GAMES"), gamesBox));
 
 
 		//we could also make a listItems for seperate games
@@ -98,7 +103,7 @@ public class GuiServer extends Application{
             }
         });
 
-		primaryStage.setScene(new Scene(pane, 500, 400));
+		primaryStage.setScene(new Scene(pane, 700, 700));
 		primaryStage.setTitle("Server GUI!");
 		primaryStage.show();
 		

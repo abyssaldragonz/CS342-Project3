@@ -192,7 +192,7 @@ public class GuiClient extends Application{
 
 		VBox mainGame = new VBox(userDropbox, gameBoard);
 
-		HBox gameRoot = new HBox(20, mainGame, clientBox);
+		HBox gameRoot = new HBox(mainGame, clientBox);
 		gameRoot.setStyle("-fx-background-color: #D9D9D9;");
 
 		Scene gameScene = new Scene(gameRoot, 750, 450);
@@ -207,7 +207,9 @@ public class GuiClient extends Application{
 		// STARTER CODE STUFF MOSTLY CLIENT BOX
 		TextField c1 = new TextField();
 		Button b1 = new Button("Send");
-		fields = new HBox(b1);
+		Button forfeit = new Button("Forfeit");
+
+		fields = new HBox(30, b1, forfeit);
 		b1.setOnAction(e->{
 			clientConnection.send(new Message(currentOpponent, username.getText(), c1.getText()));
 			listItems.getItems().add(username.getText()+": "+ c1.getText());
@@ -215,6 +217,7 @@ public class GuiClient extends Application{
 		});
 
 		clientBox = new VBox(10, c1,fields,listItems);
+		clientBox.setPrefWidth(250);
 		clientBox.setStyle("-fx-background-color: blue;"+"-fx-font-family: 'serif';");
 
 		Text queueStatus = new Text();
@@ -333,7 +336,7 @@ public class GuiClient extends Application{
 
 		VBox mainProfile = new VBox(10, profileUsername, profileButtons);
 		mainProfile.setStyle("-fx-padding: 25px;\n" );
-		Scene profilePage = new Scene(mainProfile, 700, 700);
+		Scene profilePage = new Scene(mainProfile, 700, 500);
 		// PROFILE PAGE GUI END ====================================================================================================
 
 

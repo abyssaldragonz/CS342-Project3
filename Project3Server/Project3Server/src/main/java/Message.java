@@ -113,4 +113,13 @@ public class Message implements Serializable {
         moveCol = col;
         player = play;
     }
+
+    // forfeit message
+    public Message(int gameNum, String forfeiter) {
+        type = MessageType.FORFEIT;
+        ID = gameNum;
+        message = forfeiter + " forfeited. \n You win!";
+        sender = "Server";
+        recipient = forfeiter;
+    }
 }

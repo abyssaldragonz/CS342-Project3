@@ -122,6 +122,15 @@ public class Server{
 							}
 
 							callback.accept(new Message("Server", player1.username + " matched with " + player2.username + " with game number " + gameNumber));
+
+							Message currentMoveMessage = new Message("Server", "Server", player1.username + " is making a move!");
+							try {
+								player1.out.writeObject(currentMoveMessage);
+								player2.out.writeObject(currentMoveMessage);
+							} catch (Exception e) {
+								System.err.println("Failed to send current move message");
+							}
+							callback.accept(new Message("Server", player1.username + " is making a move"));
 						}
 					break;
 					case LEFTQUEUE:
@@ -185,12 +194,29 @@ public class Server{
 						int column = message.moveCol;
 						int row = message.moveRow;
 						String currPlayer = message.sender;
+						String oppoPlayer = game.player1.username;
+						if (game.player1.username.equals(currPlayer))
+							oppoPlayer = game.player2.username;
+
+
 
 						//return if the wrong player is trying to move
 						int movingPlayer = game.gameState.playerToInt.get(currPlayer);
 						if (movingPlayer != game.gameState.currentPlayer) return;
 
-						game.gameState.placePiece(game.gameState.playerToInt.get(currPlayer), column);
+						// sending a message to flip the player if the move was successful
+						Message currentMoveMessage = new Message("Server", "Server", oppoPlayer + " is making a move!");
+						if (game.gameState.placePiece(game.gameState.playerToInt.get(currPlayer), column)) {
+							try {
+								game.player1.out.writeObject(currentMoveMessage);
+								game.player2.out.writeObject(currentMoveMessage);
+							} catch (Exception e) {
+								System.err.println("Failed to send current move message");
+							}
+
+							callback.accept(new Message("Server", currPlayer + " is making a move"));
+						}
+
 
 						game.sendMoveToPlayers(new Message(message.ID, game.gameState.playerToInt.get(currPlayer), row, column));
 						int didWin = game.gameState.winState;
@@ -277,6 +303,9 @@ public class Server{
 								}
 							}
 						}
+
+					case FORFEIT:
+						// TODO
 				}
 
 			}
