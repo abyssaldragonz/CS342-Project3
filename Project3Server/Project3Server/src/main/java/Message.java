@@ -126,7 +126,7 @@ public class Message implements Serializable {
     public Message(int filler, String sen, String rec) {
         type = MessageType.FORFEIT;
         message = sen + " forfeited. \n You win!";
-        sender = "Server";
+        sender = sen;
         recipient = rec;
     }
 }

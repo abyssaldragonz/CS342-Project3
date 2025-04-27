@@ -197,8 +197,8 @@ public class GuiClient extends Application{
 		HBox gameRoot = new HBox(mainGame, clientBox);
 		gameRoot.setStyle("-fx-background-color: #D9D9D9;");
 
-		Scene gameScene = new Scene(gameRoot, 750, 450);
-		primaryStage.setTitle("CONNECT FOUR GAME #" + gameNumber);
+		Scene gameScene = new Scene(gameRoot, 1000, 450);
+		primaryStage.setTitle("@"+ profileUsername.getText() + "CONNECT FOUR GAME #" + gameNumber + " AGAINST PLAYER @" + currentOpponent);
 		primaryStage.setScene(gameScene);
 	}
 
@@ -477,6 +477,7 @@ public class GuiClient extends Application{
 								playAgain.setText("Rematch(0/2)");
 							break;
 						case FORFEIT:
+							listItems.getItems().add("Server: "+ data.message);
 							showInGamePopup(primaryStage, profilePage, "You Win!");
 							gameEnded = true;
 

@@ -305,7 +305,7 @@ public class Server{
 						}
 						break;
 					case FORFEIT:
-						callback.accept(new Message("Server", message.sender + " forfeited the match and " + message.recipient + "wins."));
+						callback.accept(new Message("Server", message.sender + " forfeited the match and " + message.recipient + " wins."));
 						for(ClientThread t : clients) {
 							if (t.username.equals(message.recipient)) {
 								try {

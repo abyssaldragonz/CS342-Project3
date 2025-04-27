@@ -70,7 +70,7 @@ public class GuiServer extends Application{
 						break;
 					case FORFEIT:
 						if (gameMoves.containsKey(data.ID)) {
-							listItems.getItems().add(data.recipient + " has forfeited!");
+							listItems.getItems().add(data.sender + " has forfeited in game number " + data.ID + "!" );
 						}
 				}
 			});
