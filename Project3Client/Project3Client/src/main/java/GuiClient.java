@@ -118,7 +118,7 @@ public class GuiClient extends Application{
 	//Changes will be made depending on what moves are read
 	// A copy of this should probably also be stored on the server side
 	private void displayGame(Stage primaryStage, int gameNumber) {
-
+		gameEnded = false;
 		// https://docs.oracle.com/javase/8/javafx/api/javafx/scene/layout/GridPane.html
 		gameBoard = new GridPane();
 		gameBoard.setStyle("-fx-background-color: #53B7F5;\n" +
@@ -155,7 +155,7 @@ public class GuiClient extends Application{
 			int column = c == null ? 0 : c;
 			if ( (child instanceof GamePiece)) {
 				child.setOnMouseEntered(event -> {
-					if (!myTurn) return;
+					if (!myTurn || gameEnded) return;
 					if (myPlayerNumber == 0) {
 						((GamePiece) child).changeColor(10);
 					} else {
@@ -168,6 +168,8 @@ public class GuiClient extends Application{
 				});
 
 				child.setOnMousePressed(event -> {
+					System.out.println(gameEnded);
+					if (gameEnded) return;
 					// Search from bottom row upwards
 					for (int row = 5; row >= 0; row--) {
 						for (Node piece : gameBoard.getChildren()) {
@@ -337,6 +339,11 @@ public class GuiClient extends Application{
 		VBox mainProfile = new VBox(10, profileUsername, profileButtons);
 		mainProfile.setStyle("-fx-padding: 25px;\n" );
 		Scene profilePage = new Scene(mainProfile, 700, 500);
+		forfeit.setOnAction(e -> {
+			showInGamePopup(primaryStage, profilePage, "You lose.");
+			clientConnection.send(new Message(0, this.username.getText(), currentOpponent));
+			gameEnded = true;
+		});
 		// PROFILE PAGE GUI END ====================================================================================================
 
 
@@ -382,12 +389,14 @@ public class GuiClient extends Application{
 							if (data.sender.equals("Server")) {
 								if (data.message.equals("You win!")) {
 									showInGamePopup(primaryStage, profilePage, "You Win!");
+									gameEnded = true;
 								} else if (data.message.equals("You lose.")) {
 									showInGamePopup(primaryStage, profilePage, "You Lose.");
+									gameEnded = true;
 								} else if (data.message.equals("You tied!")) {
 									showInGamePopup(primaryStage, profilePage, "It's a Tie.");
+									gameEnded = true;
 								}
-								gameEnded = true;
 							}
 							break;
 						case GAMESTART:
@@ -466,6 +475,10 @@ public class GuiClient extends Application{
 								playAgain.setText("Rematch(1/2)");
 							else
 								playAgain.setText("Rematch(0/2)");
+							break;
+						case FORFEIT:
+							showInGamePopup(primaryStage, profilePage, "You Win!");
+							gameEnded = true;
 
 					}
 				});

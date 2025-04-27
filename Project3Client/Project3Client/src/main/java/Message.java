@@ -123,11 +123,10 @@ public class Message implements Serializable {
     }
 
     // forfeit message
-    public Message(int gameNum, String forfeiter) {
+    public Message(int filler, String sen, String rec) {
         type = MessageType.FORFEIT;
-        ID = gameNum;
-        message = forfeiter + " forfeited. \n You win!";
+        message = sen + " forfeited. \n You win!";
         sender = "Server";
-        recipient = forfeiter;
+        recipient = rec;
     }
 }

@@ -303,9 +303,18 @@ public class Server{
 								}
 							}
 						}
-
+						break;
 					case FORFEIT:
-						// TODO
+						callback.accept(new Message("Server", message.sender + " forfeited the match and " + message.recipient + "wins."));
+						for(ClientThread t : clients) {
+							if (t.username.equals(message.recipient)) {
+								try {
+									t.out.writeObject(message);
+								} catch (Exception e) {
+									System.err.println("rematch Error");
+								}
+							}
+						}
 				}
 
 			}

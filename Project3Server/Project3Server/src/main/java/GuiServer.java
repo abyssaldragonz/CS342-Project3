@@ -67,6 +67,7 @@ public class GuiServer extends Application{
 						if (gameMoves.containsKey(data.ID)) {
 							gameMoves.get(data.ID).getItems().add(data.sender + " moved a (row " + data.moveRow + ", col " + data.moveCol + ")");
 						}
+						break;
 					case FORFEIT:
 						if (gameMoves.containsKey(data.ID)) {
 							listItems.getItems().add(data.recipient + " has forfeited!");

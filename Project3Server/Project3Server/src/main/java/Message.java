@@ -39,12 +39,14 @@ public class Message implements Serializable {
         bool = inpBool;
     }
 
+    // server to player message
     public Message(String rec, String mess){
         type = MessageType.TEXT;
         message = mess;
         recipient = rec;
     }
 
+    // player to player message
     public Message(String rec, String sen, String mess){
         type = MessageType.TEXT;
         message = mess;
@@ -52,6 +54,7 @@ public class Message implements Serializable {
         recipient = rec;
     }
 
+    // creating new room message
     public Message(String rec, String sen, String mess, String mess2){
         if (rec.equals("Server")) {
             if (mess2.equals("NEWROOM")) {
@@ -69,6 +72,7 @@ public class Message implements Serializable {
         recipient = rec;
     }
 
+    // queue message
     public Message(boolean joinedQueue, String name){
         if (joinedQueue) {
             type = MessageType.WAITINGINQUEUE;
@@ -81,6 +85,7 @@ public class Message implements Serializable {
         }
     }
 
+    // rematch message
     public Message(boolean joinedRematch, String rec, String sen){
         type = MessageType.JOINEDREMATCH;
         bool = joinedRematch;
@@ -88,6 +93,7 @@ public class Message implements Serializable {
         sender = sen;
     }
 
+    // starting game message
     public Message(boolean gameStarted, String rec, String sen, int gameNum, boolean isFirst){
         if(gameStarted) {
             type = MessageType.GAMESTART;
@@ -98,6 +104,8 @@ public class Message implements Serializable {
             bool = isFirst;
         }
     }
+
+    // make move message
     public Message(int gameNum, String sen, int row, int col){
         type = MessageType.MAKEMOVE;
         ID = gameNum;
@@ -105,7 +113,7 @@ public class Message implements Serializable {
         moveCol = col;
         sender = sen;
     }
-    //same thing but with an int player
+    //same thing as above but with an int player
     public Message(int gameNum, int play, int row, int col){
         type = MessageType.MAKEMOVE;
         ID = gameNum;
@@ -115,11 +123,10 @@ public class Message implements Serializable {
     }
 
     // forfeit message
-    public Message(int gameNum, String forfeiter) {
+    public Message(int filler, String sen, String rec) {
         type = MessageType.FORFEIT;
-        ID = gameNum;
-        message = forfeiter + " forfeited. \n You win!";
+        message = sen + " forfeited. \n You win!";
         sender = "Server";
-        recipient = forfeiter;
+        recipient = rec;
     }
 }
